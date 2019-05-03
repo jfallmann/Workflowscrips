@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-05-03 10:31:42 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 12:00:05 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -77,7 +77,7 @@ sub fetch_chrom_sizes{
 		  open(my $fh,">",$file)||die "Could not open $file\n";
 		  foreach (@chromsize){
 			  next if ($_ =~ /^#/);
-			  $chrtag = 1 if ($_ = /^chr/);
+			  $chrtag = 1 if ($_ =~ /^chr/);
 			  (my $entry = $_) =~ s/^chr//g;
 			  print $entry $_."\n";
 		  }
@@ -96,7 +96,7 @@ sub fetch_chrom_sizes{
 			  open(my $fh,">",$file)||die "Could not open $file\n";
 			  foreach (@chromsize){
 				  next if ($_ =~ /^#/);
-				  $chrtag = 1 if ($_ = /^chr/);
+				  $chrtag = 1 if ($_ =~ /^chr/);
 				  (my $entry = $_) =~ s/^chr//g;
 				  print $entry $_."\n";
 			  }
@@ -112,15 +112,17 @@ sub fetch_chrom_sizes{
   }
   else{
 	  print STDERR "Reading chromsizes from $file!\n";
-	  open(my $fh,"<",$file)||die "Could not open $file\n";
+	  open(my $fh,"<",$file)||die "Could not open $file\n";	  
 	  push @chromsize, <$fh>;
 	  close($fh);
   }
   foreach (@chromsize){
     chomp($_);
     foreach (split(/\n/,$_)){
-      my ($chr,$size)=split (/\t/,$_);
-      $sizes{$chr}=$size;
+		my ($chr,$size)=split (/\t/,$_);
+		$chrtag = 1 if ($chr =~ /^chr/);
+		$chr =~ s/^chr//g;
+		$sizes{$chr}=$size;
     }
   }
   return(\%sizes, $chrtag);

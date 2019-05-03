@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-05-03 10:35:57 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 12:00:29 fall> by joerg
 
 #### use things ###
 use strict;
@@ -81,8 +81,6 @@ elsif ($species eq "Worm" or $species eq "worm"){$spec			 = "Caenorhabditis_eleg
 else{$spec														 = $species;}
 
 my ($sizes, $tag)=Collection::fetch_chrom_sizes("$spec","$chromsize");
-
-
 
 my ($covplus, $covminus, $annop, $annom, $totalreads) = Collection::bed_to_coverage($file, $anno, $sizes, $peak, $conv);
 
