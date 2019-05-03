@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-05-03 12:00:29 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 12:59:17 fall> by joerg
 
 #### use things ###
 use strict;
@@ -90,7 +90,6 @@ if (defined $scale){
 else{
 	$scale = 1;
 }
-
 
 if (%{$covplus}){
 	foreach my $key (sort {$covplus->{$a} <=> $covplus->{$b}} keys %{$covplus}){
