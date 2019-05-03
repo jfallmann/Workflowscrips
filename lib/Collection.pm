@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-05-03 14:18:53 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 14:42:35 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -1104,13 +1104,14 @@ sub parse_annotation{
 	my $species = shift;
 	my $host    = shift;
 	my $dbv     = shift;
+	my $usename = shift || undef;
 
 	if ($file =~/.gff/ || $file =~ /.gtf/){
 		open(my $gff,"<:gzip(autopop)",$file);
 		chomp(my $line = <$gff>);
 #		next unless ($line =~/^#/);
 		if ($line =~ /gff-version\s+3/){
-			my $out = parse_ensembl_gff3($file, $check, $chr);
+			my $out = parse_ensembl_gff3($file, $check, $chr, $usename);
 			return($out);
 		}
 		else{
@@ -1230,6 +1231,7 @@ sub parse_ensembl_gff3{
 	my $file       = shift;
 	my $check      = shift;
 	my $chl        = shift;
+	my $usename    = shift;
 	my $regions    = {};
 
 	open(my $gff,"<:gzip(autopop)",$file);
@@ -1257,7 +1259,7 @@ sub parse_ensembl_gff3{
 			my($k,$val) = split("=",$_);
 			$annotation->{$k}=$val;
 		}
-		if ($annotation->{ID}){
+		if ($annotation->{ID} && !$usename){
 			if ($annotation->{ID} =~ /:/){
 				$annotation->{ID} = (split(":",$annotation->{ID}))[1];
 			}

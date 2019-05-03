@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script AnotateBed.pl;
-#Last changed Time-stamp: <2019-03-14 17:04:55 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 14:38:53 fall> by joerg
 
 #### use things ###
 use strict;
@@ -20,7 +20,7 @@ use FindBin::Real qw(Bin); # locate this script
 # start reading command line options
 ###############################################################################
 
-my ( $species, $dir, $odir, $region, $spec, $bed, $VERBOSE, $eversion, $pversion, $dversion, $mysql, $dbversion, $file, $coords, $ignore, $enslibpath, $libpath, $specific );
+my ( $species, $dir, $odir, $region, $spec, $bed, $VERBOSE, $eversion, $pversion, $dversion, $mysql, $dbversion, $file, $coords, $ignore, $enslibpath, $libpath, $specific, $usename );
 my ( @dirs, @beds );
 
 BEGIN{
@@ -47,6 +47,7 @@ BEGIN{
 			"withcoords|w=s"   => \$coords,
 			"ignorestrand|i=s" => \$ignore,	
 			"specific=s"       => \$specific,
+			"usename|u"        => \$usename,
 			"help|h"           => sub{pod2usage(-verbose => 1)},
 			"man|m"            => sub{pod2usage(-verbose => 2)},      
 			"verbose"          => sub{ $VERBOSE++ }
@@ -132,7 +133,7 @@ my $check = {map { lc($_) => 1; } (@checks)};
 @checks=();
 
 print STDERR "Parsing Annotation\n";
-my $intervals = Collection::parse_annotation($file, $check, $chl, $species, $mysql, $dversion);
+my $intervals = Collection::parse_annotation($file, $check, $chl, $species, $mysql, $dversion, $usename);
 
 $chl={};
 #print Dumper($intervals);
