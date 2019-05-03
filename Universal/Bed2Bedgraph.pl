@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-03-13 16:55:00 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 10:35:57 fall> by joerg
 
 #### use things ###
 use strict;
@@ -80,7 +80,9 @@ elsif ($species eq "Drosophila" or $species eq "drosophila"){$spec = "Drosophila
 elsif ($species eq "Worm" or $species eq "worm"){$spec			 = "Caenorhabditis_elegans";}
 else{$spec														 = $species;}
 
-my $sizes=Collection::fetch_chrom_sizes("$spec","$chromsize");
+my ($sizes, $tag)=Collection::fetch_chrom_sizes("$spec","$chromsize");
+
+
 
 my ($covplus, $covminus, $annop, $annom, $totalreads) = Collection::bed_to_coverage($file, $anno, $sizes, $peak, $conv);
 
@@ -94,16 +96,18 @@ else{
 
 if (%{$covplus}){
 	foreach my $key (sort {$covplus->{$a} <=> $covplus->{$b}} keys %{$covplus}){
+		my $chr = $key;
+		$chr = 'chr'.$chr if ($tag);
 		foreach my $pos (sort {$covplus->{$key}->{$a} cmp $covplus->{$key}->{$b}} keys %{$covplus->{$key}}){
 			if ($track && $track eq "track"){
 				my $cov=$covplus->{$key}->{$pos}*$scale;
 				my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");
 				open (my $OUT, ">>:gzip", $forward);#"chr".$chrom."\.$type\.fw.track.gz");
 				if ($anno && $anno eq "anno"){
-					print $OUT "$key\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
 				}
 				else{
-					print $OUT "$key\t$pos\t".($pos+1)."\t$cov\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
 				}
 				close ($OUT);
 			}
@@ -112,10 +116,10 @@ if (%{$covplus}){
 				my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");
 				open (my $OUT, ">>:gzip", $forward);# "chr".$chrom."\.$type\.fw.gz");
 				if ($anno && $anno eq "anno"){
-					print $OUT "$key\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
 				}
 				else{
-					print $OUT "$key\t$pos\t".($pos+1)."\t$cov\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
 				}
 				close ($OUT);
 			}
@@ -125,6 +129,7 @@ if (%{$covplus}){
 else{
 	open (my $OUT, ">>:gzip", $forward);# "chr".$chrom."\.$type\.fw.gz");
 	foreach my $chr (keys %{$sizes}){
+		$chr = 'chr'.$chr if ($tag);
 		print $OUT join("\t",$chr,0,0,0)."\n";
 	}
 	close($OUT);
@@ -132,16 +137,18 @@ else{
 
 if(%{$covminus}){
 	foreach my $key (sort {$covminus->{$a} <=> $covminus->{$b}} keys %{$covminus}){
+		my $chr = $key;
+		$chr = 'chr'.$chr if ($tag);
 		foreach my $pos (sort {$covminus->{$key}->{$a} <=> $covminus->{$key}->{$b}} keys %{$covminus->{$key}}){
 			if ($track && $track eq "track"){
 				my $cov=$covminus->{$key}->{$pos}*$scale;
 				my $annotation=$annom->{$key}->{$pos} if ($anno && $anno eq "anno");
 				open (my $OUT, ">>:gzip", $reverse);# "chr".$chrom."\.$type\.re.track.gz");
 				if ($anno && $anno eq "anno"){
-					print $OUT "$key\t$pos\t".($pos+1)."\t-$cov\t$annotation\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t-$cov\t$annotation\n";
 				}
 				else{
-					print $OUT "$key\t$pos\t".($pos+1)."\t-$cov\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t-$cov\n";
 				}
 				close ($OUT);
 			}
@@ -152,10 +159,10 @@ if(%{$covminus}){
 				my $chrom=$tmp[0];
 				open (my $OUT, ">>:gzip", $reverse);#"chr".$chrom."\.$type\.re.gz");
 				if ($anno && $anno eq "anno"){
-					print $OUT "chr$key\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
 				}
 				else{
-					print $OUT "chr$key\t$pos\t".($pos+1)."\t$cov\n";
+					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
 				}
 				close ($OUT);
 			}
@@ -165,6 +172,7 @@ if(%{$covminus}){
 else{
 	open (my $OUT, ">>:gzip", $reverse);
 	foreach my $chr (keys %{$sizes}){
+		$chr = 'chr'.$chr if ($tag);
 		print $OUT join("\t",$chr,0,0,0)."\n";
 	}
 	close($OUT);

@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-05-03 10:07:32 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 10:31:42 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -55,6 +55,7 @@ sub fetch_chrom_sizes{
   my $file    = shift;
   my %sizes;
   my @chromsize;
+  my $chrtag = 0;
   my $this_function = (caller(0))[3];
 
   my $genome  = 'hg38';
@@ -76,6 +77,7 @@ sub fetch_chrom_sizes{
 		  open(my $fh,">",$file)||die "Could not open $file\n";
 		  foreach (@chromsize){
 			  next if ($_ =~ /^#/);
+			  $chrtag = 1 if ($_ = /^chr/);
 			  (my $entry = $_) =~ s/^chr//g;
 			  print $entry $_."\n";
 		  }
@@ -94,6 +96,7 @@ sub fetch_chrom_sizes{
 			  open(my $fh,">",$file)||die "Could not open $file\n";
 			  foreach (@chromsize){
 				  next if ($_ =~ /^#/);
+				  $chrtag = 1 if ($_ = /^chr/);
 				  (my $entry = $_) =~ s/^chr//g;
 				  print $entry $_."\n";
 			  }
@@ -120,7 +123,7 @@ sub fetch_chrom_sizes{
       $sizes{$chr}=$size;
     }
   }
-  return(\%sizes);
+  return(\%sizes, $chrtag);
 }
 
 sub fetch_chrom_sizes_old{
