@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-05-03 10:07:32 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 14:17:58 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -1232,7 +1232,7 @@ sub parse_ensembl_gff3{
 	while(<$gff>){
 		chomp($_);
 		next if ($_ =~ /^#/);
-		#		print $_."\n";
+
 		my ($seqid, $source, $type, $start, $end, $score, $strand, $phase, $attributes) = split(/\t/,$_);
 		$seqid =~ s/^chr//g;
 		$seqid =~ s/_/=/g;
@@ -1253,10 +1253,20 @@ sub parse_ensembl_gff3{
 			$annotation->{$k}=$val;
 		}
 		if ($annotation->{ID}){
-			$annotation->{ID} = (split(":",$annotation->{ID}))[1];
+			if ($annotation->{ID} =~ /:/){
+				$annotation->{ID} = (split(":",$annotation->{ID}))[1];
+			}
+			else{
+				$annotation->{ID} = $annotation->{ID};
+			}
 		}
 		else{
-			$annotation->{ID} = (split(":",$annotation->{Name}))[1]||(split(":",$annotation->{Name}))[0];
+			if ($annotation->{Name} =~ /:/){
+				$annotation->{ID} = (split(":",$annotation->{Name}))[1]||(split(":",$annotation->{Name}))[0];
+			}
+			else{
+				$annotation->{ID} = $annotation->{Name};
+			}
 		}
 
 		$annotation->{start}  = $start-1;
