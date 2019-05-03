@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-05-03 10:35:57 fall> by joerg
+#Last changed Time-stamp: <2019-05-03 10:48:37 fall> by joerg
 
 #### use things ###
 use strict;
@@ -82,7 +82,7 @@ else{$spec														 = $species;}
 
 my ($sizes, $tag)=Collection::fetch_chrom_sizes("$spec","$chromsize");
 
-
+print Dumper($sizes);
 
 my ($covplus, $covminus, $annop, $annom, $totalreads) = Collection::bed_to_coverage($file, $anno, $sizes, $peak, $conv);
 
@@ -92,7 +92,6 @@ if (defined $scale){
 else{
 	$scale = 1;
 }
-
 
 if (%{$covplus}){
 	foreach my $key (sort {$covplus->{$a} <=> $covplus->{$b}} keys %{$covplus}){
