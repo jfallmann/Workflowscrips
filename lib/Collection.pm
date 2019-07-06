@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-07-06 18:41:40 fall> by joerg
+#Last changed Time-stamp: <2019-07-06 19:00:35 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -79,7 +79,7 @@ sub fetch_chrom_sizes{
 			  next if ($_ =~ /^#/);
 			  $chrtag = 1 if ($_ =~ /^chr/);
 			  (my $entry = $_) =~ s/^chr//g;
-			  print $entry."\n";
+			  print $fh $entry."\n";
 		  }
 		  close($fh);
 	  }
