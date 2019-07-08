@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-05-03 14:42:35 fall> by joerg
+#Last changed Time-stamp: <2019-07-06 19:00:35 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -79,7 +79,7 @@ sub fetch_chrom_sizes{
 			  next if ($_ =~ /^#/);
 			  $chrtag = 1 if ($_ =~ /^chr/);
 			  (my $entry = $_) =~ s/^chr//g;
-			  print $entry $_."\n";
+			  print $fh $entry."\n";
 		  }
 		  close($fh);
 	  }
@@ -112,7 +112,7 @@ sub fetch_chrom_sizes{
   }
   else{
 	  print STDERR "Reading chromsizes from $file!\n";
-	  open(my $fh,"<",$file)||die "Could not open $file\n";	  
+	  open(my $fh,"<",$file)||die "Could not open $file\n";
 	  push @chromsize, <$fh>;
 	  close($fh);
   }
@@ -1037,7 +1037,7 @@ sub parse_bed{
 
 		while(<BED>){
 			chomp (my $raw = $_);
-			$raw =~ s/[ ]+/\|/g; 
+			$raw =~ s/[ ]+/\|/g;
 			push my @line , split (/\t/,$raw);
 
 			(my $chromosome = $line[0])=~ s/^chr//g;
@@ -2047,7 +2047,7 @@ sub unique_bed{
 	##return vars
 	my $unique={};
 	my $totalreads=0;
-	
+
 	open (my $in, "<:gzip(autopop)" , $bed);
 
 	while (<$in>){
@@ -2195,7 +2195,7 @@ sub bed_to_coverage{
 	my $peak   = shift;
 	my $conv   = shift;
 	my $totalreads = 0;
-	
+
 	#return vars
 	my $covplus	 = {};
 	my $covminus = {};
@@ -2299,11 +2299,11 @@ sub bed_to_coverage{
 			}
 		}
 	}
-	
+
 	close($in);
 
 	return($covplus, $covminus, $annop, $annom, $totalreads);
-	
+
 }
 
 1;
