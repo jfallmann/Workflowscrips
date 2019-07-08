@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script AnotateBed.pl;
-#Last changed Time-stamp: <2019-05-03 14:38:53 fall> by joerg
+#Last changed Time-stamp: <2019-07-08 13:50:47 fall> by joerg
 
 #### use things ###
 use strict;
@@ -45,11 +45,11 @@ BEGIN{
 			"enslibpath|x=s"   => \$enslibpath,
 			"libpath|l=s"	   => \$libpath,
 			"withcoords|w=s"   => \$coords,
-			"ignorestrand|i=s" => \$ignore,	
+			"ignorestrand|i=s" => \$ignore,
 			"specific=s"       => \$specific,
 			"usename|u"        => \$usename,
 			"help|h"           => sub{pod2usage(-verbose => 1)},
-			"man|m"            => sub{pod2usage(-verbose => 2)},      
+			"man|m"            => sub{pod2usage(-verbose => 2)},
 			"verbose"          => sub{ $VERBOSE++ }
 		);
 
@@ -83,7 +83,7 @@ use Bio::SeqFeature::Generic;
 ##################
 # Main
 ##################
-	
+
 if(!$dir){$dir	 = cwd();}
 if(!$odir){$odir = $dir."\/Annotated";}
 
@@ -146,8 +146,8 @@ foreach my $chroms (@chromlist){
 	foreach my $uni ( sort{$a cmp $b} grep {${pat}} keys %{$unique} ){
 		my @tempuni = split(/\_/,$uni);
 		push @tempuni , split(/\_/,$unique->{$uni});
-		
-		(my $chromosome = $tempuni[0]) =~ s/=/_/g;		
+
+		(my $chromosome = $tempuni[0]) =~ s/=/_/g;
 		my $start      = $tempuni[1];
 		my $end        = $tempuni[2];
 		my $strand     = $tempuni[3];
@@ -160,8 +160,8 @@ foreach my $chroms (@chromlist){
 		my $res;
 		$res=$intervals->{"$chromosome"}->{"$strand"}->fetch($start,$end) if (defined $intervals->{"$chromosome"}->{"$strand"});
 		push @intersects , $res if (defined $res);
-		
-		if ($strand eq "u" and !defined $intervals->{"$chromosome"}->{"u"}){
+
+		if (($strand eq "u" and !defined $intervals->{"$chromosome"}->{"u"}) or ($strand eq "." and !defined $intervals->{"$chromosome"}->{"."})){
 			$res=$intervals->{"$chromosome"}->{"+"}->fetch($start,$end) if (defined $intervals->{"$chromosome"}->{"+"});
 			push @intersects , @$res if (defined $res);
 			$res=$intervals->{"$chromosome"}->{"-"}->fetch($start,$end) if (defined $intervals->{"$chromosome"}->{"-"});
@@ -200,7 +200,7 @@ foreach my $chroms (@chromlist){
 				(my $featurename = join("|",grep(/ENS*G/,@{$fid}))) =~ s/=/_/g;
 				$featurename = 'intergenic' if ($featurename eq '');
 				$tempbed.="\t$featurename\t$score\t$fstr";
-				$tempbed .= "\t$rest";				
+				$tempbed .= "\t$rest";
 				$tempbed .= "\t".join("\t",join("|",@{$fid}),join("|",@{$ftype}));
 				print STDOUT $tempbed."\n" if (defined $tempbed);
 				$tempbed = "chr$chromosome\t".$start."\t".$end;
@@ -256,7 +256,7 @@ Enter positions (start end) of ARE motifs in sequence, e.g. foldem.pl --position
 Enter the name of the gene to work with, e.g. foldem.pl --gene ENSG00000000003 I<STRING>
 
 =back
-    
+
 =head1 DESCRIPTION
 
 This program will take positions of ARE motifs return the sequence with 100 flanking nucleotides on both sides.
@@ -264,5 +264,5 @@ This program will take positions of ARE motifs return the sequence with 100 flan
 =head1 AUTHOR
 
 Joerg Fallmann
-    
+
 =cut
