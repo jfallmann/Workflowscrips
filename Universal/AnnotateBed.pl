@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script AnotateBed.pl;
-#Last changed Time-stamp: <2019-07-08 13:50:47 fall> by joerg
+#Last changed Time-stamp: <2019-07-09 15:30:47 fall> by joerg
 
 #### use things ###
 use strict;
@@ -152,7 +152,7 @@ foreach my $chroms (@chromlist){
 		my $end        = $tempuni[2];
 		my $strand     = $tempuni[3];
 		(my $name      = $tempuni[4]) =~ s/=/_/g;
-		my $score      = $tempuni[5];
+		(my $score      = $tempuni[5]) =~ s/u/0/g;
 		my $summit     = $tempuni[6];
 		(my $rest      = $tempuni[7]) =~ s/=/_/g;
 

@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-07-06 19:00:35 fall> by joerg
+#Last changed Time-stamp: <2019-07-09 15:31:49 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -1046,7 +1046,7 @@ sub parse_bed{
 			my $end		= $line[2];
 			$end +=1 if ($end == $start); #Fix for broken bed format from peak callers
 			(my $name	= $line[3])=~ s/_/=/g ||'u';
-			my $score	= $line[4] || 'u';
+			my $score	= $line[4] || '0';
 			my $strand  = $line[5] || 'u';
 			$strand		= "u" if (($strand ne "-" && $strand ne "+") || ($ignore eq 'ON'));
 			my $rest; # should this be more than just a bed 6 file
