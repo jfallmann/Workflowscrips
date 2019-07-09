@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-05-03 12:59:17 fall> by joerg
+#Last changed Time-stamp: <2019-07-09 16:20:39 fall> by joerg
 
 #### use things ###
 use strict;
@@ -95,7 +95,8 @@ if (%{$covplus}){
 	foreach my $key (sort {$covplus->{$a} <=> $covplus->{$b}} keys %{$covplus}){
 		my $chr = $key;
 		$chr = 'chr'.$chr if ($tag);
-		foreach my $pos (sort {$covplus->{$key}->{$a} cmp $covplus->{$key}->{$b}} keys %{$covplus->{$key}}){
+		#		foreach my $pos (sort {$covplus->{$key}->{$a} cmp $covplus->{$key}->{$b}} keys %{$covplus->{$key}}){
+		foreach my $pos (keys %{$covplus->{$key}}){ #Using tie hash index to skip this sorting part, input need to be sorted!!!
 			if ($track && $track eq "track"){
 				my $cov=$covplus->{$key}->{$pos}*$scale;
 				my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");

@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-07-09 15:31:49 fall> by joerg
+#Last changed Time-stamp: <2019-07-09 16:15:14 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2116,7 +2116,8 @@ sub uniqbed_to_coverage{
 				@pro = split(/\|/,$rest[0]) if ($rest[0] =~ /\:/);
 #				@pro = parse_peakprofile(\@pro, $start)
 			}
-			my %poscov = ();
+#			my %poscov = ();
+			tie my %poscov, 'Tie::Hash::Indexed';
 #			print Dumper(\@pro);
 			if ($conv && $conv eq "on"){ ## If we use a split peak file
 				my $nuk = $cstart-1;
@@ -2231,7 +2232,8 @@ sub bed_to_coverage{
 				@pro = split(/\|/,$rest[0]) if ($rest[0] =~ /\:/);
 #				@pro = parse_peakprofile(\@pro, $start)
 			}
-			my %poscov = ();
+#			my %poscov = ();
+			tie my %poscov, 'Tie::Hash::Indexed';
 #			print Dumper(\@pro);
 			if ($conv && $conv eq "on"){ ## If we use a split peak file
 				my $nuk = $cstart-1;
