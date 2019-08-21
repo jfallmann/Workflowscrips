@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-08-21 11:48:01 fall> by joerg
+#Last changed Time-stamp: <2019-08-21 11:49:58 fall> by joerg
 
 #### use things ###
 use strict;
@@ -129,7 +129,7 @@ if (%{$covplus}){
 		}
 		# Print to file chromosome wise
 		open (my $OUT, ">>:gzip", $forward);#"chr".$chrom."\.$type\.fw.track.gz");
-		my $line = shift $outa;
+		my $line = shift @outa;
 		print $OUT $line;
 		close ($OUT);
 	}
@@ -182,7 +182,7 @@ if(%{$covminus}){
 			}
 		}
 		open (my $OUT, ">>:gzip", $reverse);
-		my $line = shift $outa;
+		my $line = shift @outa;
 		print $OUT $line;
 		close($OUT);
 	}
