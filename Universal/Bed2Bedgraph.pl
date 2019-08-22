@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-08-21 11:49:58 fall> by joerg
+#Last changed Time-stamp: <2019-08-22 09:17:16 fall> by joerg
 
 #### use things ###
 use strict;
@@ -81,8 +81,11 @@ elsif ($species eq "Worm" or $species eq "worm"){$spec			 = "Caenorhabditis_eleg
 else{$spec														 = $species;}
 
 my ($sizes, $tag)=Collection::fetch_chrom_sizes("$spec","$chromsize");
+print STDERR "Chromsize collected\n";
 
 my ($covplus, $covminus, $annop, $annom, $totalreads) = Collection::bed_to_coverage($file, $anno, $sizes, $peak, $conv);
+
+print STDERR "Bedcoverage collected\n";
 
 if (defined $scale){
 	$scale /= $totalreads;
@@ -93,6 +96,7 @@ else{
 
 if (%{$covplus}){
 	foreach my $key (sort {$covplus->{$a} <=> $covplus->{$b}} keys %{$covplus}){
+		print STDERR "Processing $key forward\n";
 		my @outa;
 		my $chr = $key;
 		$chr = 'chr'.$chr if ($tag);
@@ -146,6 +150,7 @@ else{
 
 if(%{$covminus}){
 	foreach my $key (sort {$covminus->{$a} <=> $covminus->{$b}} keys %{$covminus}){
+		print STDERR "Processing $key reverse\n";
 		my @outa;
 		my $chr = $key;
 		$chr = 'chr'.$chr if ($tag);
