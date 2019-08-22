@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-22 19:57:21 fall> by joerg
+#Last changed Time-stamp: <2019-08-22 20:22:46 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2205,7 +2205,7 @@ sub bed_to_coverage{
 
 	my $in;
 	if ($bed = ~ /.gz/){
-		open($in, "-|", 'gunzip', '-cd', $bed);
+		open ($in, "<:gzip" , $bed);
 	}
 	else{
 		open ($in, "<:gzip(autopop)" , $bed);
