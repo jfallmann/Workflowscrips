@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-23 09:54:18 fall> by joerg
+#Last changed Time-stamp: <2019-08-23 10:36:34 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2198,10 +2198,10 @@ sub bed_to_coverage{
 	my $totalreads = 0;
 
 	#return vars
-	my $covplus	 = {};
-	my $covminus = {};
-	my $annop	 = {};
-	my $annom	 = {};
+	tie my $covplus, 'Tie::Hash::Indexed';
+	tie my $covminus, 'Tie::Hash::Indexed';
+	tie my $annop, 'Tie::Hash::Indexed';
+	tie my $annom, 'Tie::Hash::Indexed';
 
 	my $in;
 	my @lines;
@@ -2243,8 +2243,8 @@ sub bed_to_coverage{
 				@pro = split(/\|/,$rest[0]) if ($rest[0] =~ /\:/);
 #				@pro = parse_peakprofile(\@pro, $start)
 			}
-#			my %poscov = ();
-			tie my %poscov, 'Tie::Hash::Indexed';
+			my %poscov = ();
+#			tie my %poscov, 'Tie::Hash::Indexed';
 #			print Dumper(\@pro);
 			if ($conv && $conv eq "on"){ ## If we use a split peak file
 				my $nuk = $cstart-1;

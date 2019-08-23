@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script Bed2Bedgraph.pl;
-#Last changed Time-stamp: <2019-08-22 09:17:16 fall> by joerg
+#Last changed Time-stamp: <2019-08-23 10:34:37 fall> by joerg
 
 #### use things ###
 use strict;
@@ -100,41 +100,23 @@ if (%{$covplus}){
 		my @outa;
 		my $chr = $key;
 		$chr = 'chr'.$chr if ($tag);
-		#		foreach my $pos (sort {$covplus->{$key}->{$a} cmp $covplus->{$key}->{$b}} keys %{$covplus->{$key}}){
+#		foreach my $pos (sort {$covplus->{$key}->{$a} cmp $covplus->{$key}->{$b}} keys %{$covplus->{$key}}){
 		foreach my $pos (keys %{$covplus->{$key}}){ #Using tie hash index to skip this sorting part, input need to be sorted!!!
-			if ($track && $track eq "track"){
-				my $cov=$covplus->{$key}->{$pos}*$scale;
-				my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");
-				#				open (my $OUT, ">>:gzip", $forward);#"chr".$chrom."\.$type\.fw.track.gz");
-				if ($anno && $anno eq "anno"){
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-				}
-				else{
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\n";
-				}
-				#				close ($OUT);
+			my $cov=$covplus->{$key}->{$pos}*$scale;
+			my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");
+			if ($anno && $anno eq "anno"){
+				push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
 			}
 			else{
-				my $cov=$covplus->{$key}->{$pos}*$scale;
-				my $annotation=$annop->{$key}->{$pos} if ($anno && $anno eq "anno");
-				#				open (my $OUT, ">>:gzip", $forward);# "chr".$chrom."\.$type\.fw.gz");
-				if ($anno && $anno eq "anno"){
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-				}
-				else{
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\n";
-				}
-				#				close ($OUT);
+				push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\n";
 			}
 		}
+
 		# Print to file chromosome wise
 		open (my $OUT, ">>:gzip", $forward);#"chr".$chrom."\.$type\.fw.track.gz");
-		my $line = shift @outa;
-		print $OUT $line;
+		while(my $line = shift @outa){
+			print $OUT $line;
+		}
 		close ($OUT);
 	}
 	$covplus = ();
@@ -149,46 +131,26 @@ else{
 }
 
 if(%{$covminus}){
-	foreach my $key (sort {$covminus->{$a} <=> $covminus->{$b}} keys %{$covminus}){
+	#	foreach my $key (sort {$covminus->{$a} <=> $covminus->{$b}} keys %{$covminus}){
+	foreach my $key (keys %{$covminus}){
 		print STDERR "Processing $key reverse\n";
 		my @outa;
 		my $chr = $key;
 		$chr = 'chr'.$chr if ($tag);
 		foreach my $pos (sort {$covminus->{$key}->{$a} <=> $covminus->{$key}->{$b}} keys %{$covminus->{$key}}){
-			if ($track && $track eq "track"){
-				my $cov=$covminus->{$key}->{$pos}*$scale;
-				my $annotation=$annom->{$key}->{$pos} if ($anno && $anno eq "anno");
-				#				open (my $OUT, ">>:gzip", $reverse);# "chr".$chrom."\.$type\.re.track.gz");
-				if ($anno && $anno eq "anno"){
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t-$cov\t$annotation\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t-$cov\t$annotation\n";
-				}
-				else{
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t-$cov\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t-$cov\n";
-				}
-				#				close ($OUT);
+			my $cov=$covminus->{$key}->{$pos}*$scale;
+			my $annotation=$annom->{$key}->{$pos} if ($anno && $anno eq "anno");
+			if ($anno && $anno eq "anno"){
+				push @outa, "$chr\t$pos\t".($pos+1)."\t-$cov\t$annotation\n";
 			}
 			else{
-				my $cov=$covminus->{$key}->{$pos}*$scale; # at least one occurence
-				my $annotation=$annom->{$key}->{$pos} if ($anno && $anno eq "anno");
-				my @tmp=split(/\t/,$key);
-				my $chrom=$tmp[0];
-				#				open (my $OUT, ">>:gzip", $reverse);#"chr".$chrom."\.$type\.re.gz");
-				if ($anno && $anno eq "anno"){
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\t$annotation\n";
-				}
-				else{
-					#					print $OUT "$chr\t$pos\t".($pos+1)."\t$cov\n";
-					push @outa, "$chr\t$pos\t".($pos+1)."\t$cov\n";
-				}
-				#				close ($OUT);
+				push @outa, "$chr\t$pos\t".($pos+1)."\t-$cov\n";
 			}
 		}
 		open (my $OUT, ">>:gzip", $reverse);
-		my $line = shift @outa;
-		print $OUT $line;
+		while(my $line = shift @outa){
+			print $OUT $line;
+		}
 		close($OUT);
 	}
 }
