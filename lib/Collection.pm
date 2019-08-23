@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-22 20:22:46 fall> by joerg
+#Last changed Time-stamp: <2019-08-23 09:54:18 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2204,14 +2204,20 @@ sub bed_to_coverage{
 	my $annom	 = {};
 
 	my $in;
+	my @lines;
+
 	if ($bed = ~ /.gz/){
 		open ($in, "<:gzip" , $bed);
+		chomp(@lines = <$in>);
+		close($in)
 	}
 	else{
 		open ($in, "<:gzip(autopop)" , $bed);
+		chomp(@lines = <$in>);
+		close($in)
 	}
-	while (<$in>){
-		chomp (my $raw = $_);
+	foreach my $line (@lines){
+		chomp (my $raw = $line);
 		$totalreads ++;
 		push my @line , split (/\t/,$raw);
 		(my $chrom = $line[0])=~ s/chr//g;
