@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-23 10:36:34 fall> by joerg
+#Last changed Time-stamp: <2019-08-26 12:23:23 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2198,24 +2198,26 @@ sub bed_to_coverage{
 	my $totalreads = 0;
 
 	#return vars
-	tie my $covplus, 'Tie::Hash::Indexed';
-	tie my $covminus, 'Tie::Hash::Indexed';
-	tie my $annop, 'Tie::Hash::Indexed';
-	tie my $annom, 'Tie::Hash::Indexed';
+	tie my %covplus, 'Tie::Hash::Indexed';
+	tie my %covminus, 'Tie::Hash::Indexed';
+	tie my %annop, 'Tie::Hash::Indexed';
+	tie my %annom, 'Tie::Hash::Indexed';
 
 	my $in;
 	my @lines;
 
-	if ($bed = ~ /.gz/){
-		open ($in, "<:gzip" , $bed);
+	if ($bed =~ /.gz/){
+		open ($in, "<:gzip" , $bed) or die "$!"." With file $bed\n";
 		chomp(@lines = <$in>);
 		close($in)
 	}
 	else{
-		open ($in, "<:gzip(autopop)" , $bed);
+		open ($in, "<:gzip(autopop)" , $bed) or die "$!";
 		chomp(@lines = <$in>);
 		close($in)
 	}
+	print STDERR "Read ".$#lines." from bed ".$bed."\n";
+
 	foreach my $line (@lines){
 		chomp (my $raw = $line);
 		$totalreads ++;
@@ -2243,9 +2245,9 @@ sub bed_to_coverage{
 				@pro = split(/\|/,$rest[0]) if ($rest[0] =~ /\:/);
 #				@pro = parse_peakprofile(\@pro, $start)
 			}
+
 			my %poscov = ();
-#			tie my %poscov, 'Tie::Hash::Indexed';
-#			print Dumper(\@pro);
+
 			if ($conv && $conv eq "on"){ ## If we use a split peak file
 				my $nuk = $cstart-1;
 				foreach my $pos (@pro){
@@ -2259,15 +2261,14 @@ sub bed_to_coverage{
 				}
 				for (my $i=$cstart;$i<=$cend;$i++){
 					if ($strand eq "+" or $strand eq "1" or $strand eq "u" or $strand eq "=" or $strand eq "."){
-						$covplus->{"$chrom"}->{"$i"} += $poscov{"$i"} if (defined $poscov{"$i"});
-						$annop->{"$chrom"}->{"$i"} = $annotation if ($anno && $anno eq "anno");
+						$covplus{"$chrom"}{"$i"} += $poscov{"$i"} if (defined $poscov{"$i"});
+						$annop{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 					}
 					elsif($strand eq "-" or $strand eq "-1"){
-						$covminus->{"$chrom"}->{"$i"} += $poscov{"$i"} if (defined $poscov{"$i"});
-						$annom->{"$chrom"}->{"$i"} = $annotation if ($anno && $anno eq "anno");
+						$covminus{"$chrom"}{"$i"} += $poscov{"$i"} if (defined $poscov{"$i"});
+						$annom{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 					}
 				}
-#			print Dumper(\%poscov);
 			}
 			else{
 				my $nu = $cstart;
@@ -2290,12 +2291,12 @@ sub bed_to_coverage{
 
 				for (my $i=$cstart;$i<=$cend;$i++){
 					if ($strand eq "+" or $strand eq "1" or $strand eq "u" or $strand eq "=" or $strand eq "."){
-						$covplus->{"$chrom"}->{"$i"}+=$poscov{"$i"} if (defined $poscov{"$i"});
-						$annop->{"$chrom"}->{"$i"} = $annotation if ($anno && $anno eq "anno");
+						$covplus{"$chrom"}{"$i"}+=$poscov{"$i"} if (defined $poscov{"$i"});
+						$annop{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 					}
 					elsif($strand eq "-" or $strand eq "-1"){
-						$covminus->{"$chrom"}->{"$i"}+=$poscov{"$i"} if (defined $poscov{"$i"});
-						$annom->{"$chrom"}->{"$i"} = $annotation if ($anno && $anno eq "anno");
+						$covminus{"$chrom"}{"$i"}+=$poscov{"$i"} if (defined $poscov{"$i"});
+						$annom{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 					}
 				}
 			}
@@ -2304,10 +2305,10 @@ sub bed_to_coverage{
 			for (my $i=$cstart;$i<=$cend;$i++){
 				next if ($a > ($sizes->{$chrom}));
 				if ($strand eq "+" or $strand eq "1" or $strand eq "u" or $strand eq "=" or $strand eq "."){
-					$covplus->{"$chrom"}->{"$i"}+=1;
+					$covplus{"$chrom"}{"$i"}+=1;
 				}
 				elsif($strand eq "-" or $strand eq "-1"){
-					$covminus->{"$chrom"}->{"$i"}+=1;
+					$covminus{"$chrom"}{"$i"}+=1;
 				}
 			}
 		}
@@ -2315,7 +2316,7 @@ sub bed_to_coverage{
 
 	close($in);
 
-	return($covplus, $covminus, $annop, $annom, $totalreads);
+	return(\%covplus, \%covminus, \%annop, \%annom, $totalreads);
 
 }
 
