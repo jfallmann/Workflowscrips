@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-26 12:23:23 fall> by joerg
+#Last changed Time-stamp: <2019-08-28 13:40:40 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -2197,6 +2197,7 @@ sub bed_to_coverage{
 	my $conv   = shift;
 	my $totalreads = 0;
 
+	print STDERR "Transforming Bed with arguments ".join(";",$bed,$anno,$sizes,$peak,$conv)."\n";
 	#return vars
 	tie my %covplus, 'Tie::Hash::Indexed';
 	tie my %covminus, 'Tie::Hash::Indexed';
@@ -2217,10 +2218,10 @@ sub bed_to_coverage{
 		close($in)
 	}
 	print STDERR "Read ".$#lines." from bed ".$bed."\n";
+	$totalreads = $#lines;
 
-	foreach my $line (@lines){
-		chomp (my $raw = $line);
-		$totalreads ++;
+	while (@lines){
+		chom(my $raw = pop @lines);
 		push my @line , split (/\t/,$raw);
 		(my $chrom = $line[0])=~ s/chr//g;
 		$chrom		= "M" if ($chrom eq 'MT');
@@ -2231,7 +2232,7 @@ sub bed_to_coverage{
 		(my $strand	= $line[5])=~s/\(|\)//g || 'u';
 		$strand         = "u" if ($strand ne '+' && $strand ne '-');
 		my $annotation;
-		($annotation = join("\t",@line[6..$#line]))=~ s/\_/=/g;
+		($annotation = join("\t",@line[6..$#line]))=~ s/\_/=/g if ($line[6]);
 		$annotation  = '' if ($annotation eq 'undef');
 		my @rest	 = split(/\t/,$annotation);
 
@@ -2239,16 +2240,14 @@ sub bed_to_coverage{
 			my @pro;
 			if ($name =~ /\:/){
 				@pro = split(/\|/,$name) ;
-#				@pro = parse_peakprofile(\@pro, $start)
 			}
 			else{
 				@pro = split(/\|/,$rest[0]) if ($rest[0] =~ /\:/);
-#				@pro = parse_peakprofile(\@pro, $start)
 			}
 
 			my %poscov = ();
 
-			if ($conv && $conv eq "on"){ ## If we use a split peak file
+			if ($conv && $conv eq "on"){ ## If coordinates already genomic
 				my $nuk = $cstart-1;
 				foreach my $pos (@pro){
 					my @bla = split (/\:/,$pos);
@@ -2303,19 +2302,18 @@ sub bed_to_coverage{
 		}
 		else{
 			for (my $i=$cstart;$i<=$cend;$i++){
-				next if ($a > ($sizes->{$chrom}));
+				next if ($i > ($sizes->{$chrom}));
 				if ($strand eq "+" or $strand eq "1" or $strand eq "u" or $strand eq "=" or $strand eq "."){
 					$covplus{"$chrom"}{"$i"}+=1;
+					$annop{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 				}
 				elsif($strand eq "-" or $strand eq "-1"){
 					$covminus{"$chrom"}{"$i"}+=1;
+					$annom{"$chrom"}{"$i"} = $annotation if ($anno && $anno eq "anno");
 				}
 			}
 		}
 	}
-
-	close($in);
-
 	return(\%covplus, \%covminus, \%annop, \%annom, $totalreads);
 
 }
