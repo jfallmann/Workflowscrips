@@ -4,7 +4,7 @@ inf=$1
 
 if [[ -s $inf ]]
 then
-	if [[ "$1" == *.gz* ]]
+	if [[ "$inf" == *.gz* ]]
 	then
 		zcat $inf |samtools faidx -
 	else
