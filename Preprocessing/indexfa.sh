@@ -4,9 +4,10 @@ inf=$1
 
 if [[ -s $inf ]]
 then
-	if [[ "$inf" == *.gz* ]]
+	if [[ "$inf" == *.gz* ]]	   
 	then
-		zcat $inf |samtools faidx -
+		filename="${inf%.*}"
+		zcat $inf > $filename && samtools faidx $filename && rm -f $filename
 	else
 		samtools faidx $inf
 	fi
