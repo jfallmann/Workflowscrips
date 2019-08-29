@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #Script ExtendBed.pl;
-#Last changed Time-stamp: <2019-03-01 09:28:48 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2019-08-29 17:48:09 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 ###############
 ###Use stuff
 ###############
@@ -112,6 +112,9 @@ if ($trim){
 }
 
 my($filename, $dirs, $suffix) = fileparse($b,'.bed');
+if ($b =~ '.bed.gz$'){
+	($filename, $dirs, $suffix) = fileparse($b,'.bed.gz');
+}
 
 $o = $filename.$filextension.$suffix unless ($o);
 
