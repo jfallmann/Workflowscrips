@@ -7,9 +7,9 @@
 # Created: Mon Dec  4 09:54:46 2017 (+0100)
 # Version:
 # Package-Requires: ()
-# Last-Updated: Mon Sep  9 14:26:10 2019 (+0200)
+# Last-Updated: Mon Sep  9 16:08:46 2019 (+0200)
 #           By: Joerg Fallmann
-#     Update #: 118
+#     Update #: 120
 # URL:
 # Doc URL:
 # Keywords:
@@ -68,7 +68,7 @@ date    = time.strftime("%d/%m/%Y");
 
 def parseargs():
     parser = argparse.ArgumentParser(description='GenerateTrackDb.py')
-    parser.add_argument('-e', '--header', type=int, default=0, help='If header should be created or just entries added to the trackdb file')
+    parser.add_argument('-e', '--header', type=bool, default=False, help='If header should be created or just entries added to the trackdb file')
     parser.add_argument('-t', '--track', type=str, default='trackdb.txt', help='Name of the trackdb file to generate or to extend')
     parser.add_argument('-f', '--filenames', type=str, help='Name of the file containing bwfilenames that should be added to the trackdb file, can be STDIN')
     parser.add_argument('-n', '--name', type=str, default='Autogentrack', help='Name of the track to create, can be anything')
@@ -88,7 +88,7 @@ def parseargs():
 def main(header, track, shortlabel, longlabel, file, name, url, genome, hub, mail, split):
     if header:
         if not shortlabel:
-            shortlabel = os.path.split(name)[1]
+            shortlabel = os.path.split(name)[1].split('.')[0]
         if not longlabel:
             longlabel = name
 
@@ -139,9 +139,9 @@ def main(header, track, shortlabel, longlabel, file, name, url, genome, hub, mai
 
     for content in bigwigs:
         bw = content
-        sample = os.path.split(bw)[1]
+        sample = os.path.split(bw)[1].split('.')[0]
         color = '0,0,0'#random_color()
-        shortlabel = os.path.split(bw)[1]
+        shortlabel = sample
         longlabel = bw.split('.bw',2)[0]
 
         if '\t' in  bw:
