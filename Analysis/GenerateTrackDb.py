@@ -7,9 +7,9 @@
 # Created: Mon Dec  4 09:54:46 2017 (+0100)
 # Version:
 # Package-Requires: ()
-# Last-Updated: Thu May  2 15:13:22 2019 (+0200)
+# Last-Updated: Mon Sep  9 14:26:10 2019 (+0200)
 #           By: Joerg Fallmann
-#     Update #: 117
+#     Update #: 118
 # URL:
 # Doc URL:
 # Keywords:
@@ -88,7 +88,7 @@ def parseargs():
 def main(header, track, shortlabel, longlabel, file, name, url, genome, hub, mail, split):
     if header:
         if not shortlabel:
-            shortlabel = name[:20]
+            shortlabel = os.path.split(name)[1]
         if not longlabel:
             longlabel = name
 
@@ -139,9 +139,9 @@ def main(header, track, shortlabel, longlabel, file, name, url, genome, hub, mai
 
     for content in bigwigs:
         bw = content
-        sample = 'Autogen'
+        sample = os.path.split(bw)[1]
         color = '0,0,0'#random_color()
-        shortlabel = bw[:20]
+        shortlabel = os.path.split(bw)[1]
         longlabel = bw.split('.bw',2)[0]
 
         if '\t' in  bw:
