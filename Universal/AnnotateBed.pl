@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 #Script AnotateBed.pl;
-#Last changed Time-stamp: <2019-07-09 15:30:47 fall> by joerg
+#Last changed Time-stamp: <2019-09-10 13:37:21 fall> by joerg
 
 #### use things ###
 use strict;
@@ -168,7 +168,7 @@ foreach my $chroms (@chromlist){
 			push @intersects , @$res if (defined $res);
 		}
 
-		my $tempbed = "chr$chromosome\t".$start."\t".$end;
+		my $tempbed = "$chromosome\t".$start."\t".$end;
 
 		if (@intersects){
 			my $fetch_coords = $coords || 0;
@@ -191,7 +191,7 @@ foreach my $chroms (@chromlist){
 					$tempbed .= "\t$rest";
 					$tempbed .= "\t".join("\t",$featurename,@{$fstart}[$id],@{$fend}[$id],@{$ftype}[$id],@{$fstrand}[$id]) if defined ($fstart);
 					print STDOUT $tempbed."\n" if (defined $tempbed);
-					$tempbed = "chr$chromosome\t".$start."\t".$end;
+					$tempbed = "$chromosome\t".$start."\t".$end;
 				}
 			}
 			else{
@@ -203,7 +203,7 @@ foreach my $chroms (@chromlist){
 				$tempbed .= "\t$rest";
 				$tempbed .= "\t".join("\t",join("|",@{$fid}),join("|",@{$ftype}));
 				print STDOUT $tempbed."\n" if (defined $tempbed);
-				$tempbed = "chr$chromosome\t".$start."\t".$end;
+				$tempbed = "$chromosome\t".$start."\t".$end;
 			}
 		}
 		else{
