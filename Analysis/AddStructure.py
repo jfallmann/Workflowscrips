@@ -1,3 +1,4 @@
+#/usr/bin/env python3
 # AddStructure.py ---
 #
 # Filename: AddStructure.py
@@ -7,9 +8,9 @@
 # Created: Tue Sep 10 18:00:42 2019 (+0200)
 # Version:
 # Package-Requires: ()
-# Last-Updated: Tue Sep 10 18:02:18 2019 (+0200)
+# Last-Updated: Wed Sep 11 09:10:01 2019 (+0200)
 #           By: Joerg Fallmann
-#     Update #: 1
+#     Update #: 33
 # URL:
 # Doc URL:
 # Keywords:
@@ -44,17 +45,66 @@
 #
 
 # Code:
-
+###Imports
 import sys,os
+import argparse
+import traceback as tb
+import gzip
 import RNA
 
-for line in sys.stdin:
-    sequence = '\t'.split(line)[-1]
-    # create new fold_compound object
-    fc = RNA.fold_compound(sequence)
-    # compute minimum free energy (mfe) and corresponding structure
-    (ss, mfe) = fc.mfe()
+###Arguments
+def parseargs():
+	parser = argparse.ArgumentParser(description='Add structure to (bed) file containing sequence')
+	parser.add_argument("-f", "--field", type=int, default=0, help='Which field contains the sequence, default is last field (0)')
+	parser.add_argument("-b", "--bed", type=str, help='Bed or other tab separated file containing the sequence')
 
-    sys.stdout.write('\t'.join([line.strip(),ss])+'\n')
+	return parser.parse_args()
+
+###CODE
+
+def addseq(field, bed):
+    try:
+        entries = parse_bed(bed)
+        for line in entries:
+            sequence = line.rstrip().split('\t')[field-1].upper()
+            # create model details
+            md = RNA.md()
+            # create new fold_compound object
+            fc = RNA.fold_compound(sequence, md)
+            # compute minimum free energy (mfe) and corresponding structure
+            (ss, mfe) = fc.mfe()
+
+            sys.stdout.write('\t'.join([line.strip(),ss])+'\n')
+
+    except Exception as err:
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        tbe = tb.TracebackException(
+            exc_type, exc_value, exc_tb,
+        )
+        with open('error','a') as h:
+            print(''.join(tbe.format()), file=h)
+
+def parse_bed(bed, annotated=None):
+    try:
+        if os.path.isfile(os.path.abspath(bed)):
+            if '.gz' in bed:
+                return gzip.open(bed,'rt')
+            else:
+                return open(bed,'rt')
+
+    except Exception as err:
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        tbe = tb.TracebackException(
+            exc_type, exc_value, exc_tb,
+        )
+        with open('error','a') as h:
+            print(''.join(tbe.format()), file=h)
+
+
+###MAIN
+if __name__ == '__main__':
+	args=parseargs()
+	addseq(args.field, args.bed)
+
 #
 # AddStructure.py ends here
