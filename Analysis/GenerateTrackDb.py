@@ -7,9 +7,9 @@
 # Created: Mon Dec  4 09:54:46 2017 (+0100)
 # Version:
 # Package-Requires: ()
-# Last-Updated: Wed Sep 11 14:35:47 2019 (+0200)
+# Last-Updated: Wed Sep 11 18:23:43 2019 (+0200)
 #           By: Joerg Fallmann
-#     Update #: 145
+#     Update #: 154
 # URL:
 # Doc URL:
 # Keywords:
@@ -113,10 +113,10 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                               'yLineOnOff on',
                               'maxHeightPixels 200:64:32']).format(tr = name, sl = shortlabel, ll = longlabel)
 
-            out=open('re_'+track, 'a')
-            out.write(head+'\n\n')
-            out=open('fw_'+track, 'a')
-            out.write(head+'\n\n')
+            with open('re_'+track, 'a') as out:
+                out.write(head+'\n\n')
+            with open('fw_'+track, 'a') as out:
+                out.write(head+'\n\n')
 
         if filenames == 'STDIN' or filenames == '-':
             bigwigs = []
@@ -136,16 +136,16 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                     bigwigs.append(line.split('\n',2)[0])
                     b.close()
 
-        idx = 1
-
         fwtracks = []
         retracks = []
         head = ''
+        idx = 1
 
         for content in bigwigs:
             bw = content
             sample = os.path.split(bw)[1].split('.')[0]
-            color = '0,0,0'#random_color()
+            colorfw = '128,0,0'#random_color()
+            colorre = '0,128,0'
             shortlabel = sample
             longlabel = bw.split('.bw',2)[0]
 
@@ -157,15 +157,15 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
 
                     content = '\n'.join(['track '+sample+'_re',
                                          'bigDataUrl {1}/'+bw,
-                                         'shortLabel {2}'+'_'+str(idx),
-                                         'longLabel {3}'+'_'+str(idx),
+                                         'shortLabel {2}'+'_re',
+                                         'longLabel {3}'+'_re',
                                          'type bigWig',
                                          'negateValues on #uncomment of this is wanted',
                                          'parent {4}',
-                                         'color {5}']).format(bw, url, shortlabel, longlabel, name+str(idx), color)
+                                         'color {5}']).format(bw, url, shortlabel, longlabel, sample, colorre)
                 elif not splitbw and not '.re' in longlabel:
                     head = '\n'.join(['# TrackDb_generated_by_GenerateTrackDb.txt',
-                                      'track {tr}'+str(idx),
+                                      'track {tr}',
                                       'container multiWig',
                                       'noInherit on',
                                       'shortLabel {sl}',
@@ -181,33 +181,33 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                       'alwaysZero on',
                                       'yLineMark 0',
                                       'yLineOnOff on',
-                                      'maxHeightPixels 200:64:32']).format(tr = name, sl = shortlabel, ll = longlabel)
+                                      'maxHeightPixels 200:64:32']).format(tr = sample, sl = shortlabel, ll = longlabel)
 
                     content = '\n'.join(['track '+sample+'_fw',
                                          'bigDataUrl {1}/'+bw,
-                                         'shortLabel {2}'+'_'+str(idx),
-                                         'longLabel {3}'+'_'+str(idx),
+                                         'shortLabel {2}'+'_fw',
+                                         'longLabel {3}'+'_fw',
                                          'type bigWig',
                                          '#negateValues on #uncomment of this is wanted',
                                          'parent {4}',
-                                         'color {5}']).format(bw, url, shortlabel, longlabel, name+str(idx), color)
+                                         'color {5}']).format(bw, url, shortlabel, longlabel, sample, colorfw)
             else:
                 if not splitbw and '.re' in longlabel:
-                    content = '\n'.join(['track '+sample+'_'+str(idx),
+                    content = '\n'.join(['track '+sample+'_re'+str(idx),
                                          'bigDataUrl {1}/'+bw,
-                                         'shortLabel {2}'+'_'+str(idx),
-                                         'longLabel {3}'+'_'+str(idx),
+                                         'shortLabel {2}'+'_re'+str(idx),
+                                         'longLabel {3}'+'_re'+str(idx),
                                          'type bigWig',
                                          'negateValues on #uncomment of this is wanted',
-                                         'color {5}']).format(bw, url, shortlabel, longlabel, name, color)
+                                         'color {5}']).format(bw, url, shortlabel, longlabel, name, colorre)
                 else:
-                    content = '\n'.join(['track '+sample+'_'+str(idx),
+                    content = '\n'.join(['track '+sample+'_fw'+str(idx),
                                          'bigDataUrl {1}/'+bw,
-                                         'shortLabel {2}'+'_'+str(idx),
-                                         'longLabel {3}'+'_'+str(idx),
+                                         'shortLabel {2}'+'_fw'+str(idx),
+                                         'longLabel {3}'+'_fw'+str(idx),
                                          'type bigWig',
                                          '#negateValues on #uncomment of this is wanted',
-                                         'color {5}']).format(bw, url, shortlabel, longlabel, name, color)
+                                         'color {5}']).format(bw, url, shortlabel, longlabel, name, colorfw)
 
             idx += 1
 
@@ -220,35 +220,35 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
 
         if len(retracks) > 0:
             for i in retracks:
-                out=open('re_'+track, 'a')
-                out.write(i+'\n\n')
+                with open('re_'+track, 'a') as out:
+                    out.write(i+'\n\n')
 
             for i in fwtracks:
-                out=open('fw_'+track, 'a')
-                out.write(i+'\n\n')
+                with open('fw_'+track, 'a') as out:
+                    out.write(i+'\n\n')
 
         else:
             for i in fwtracks:
-                out=open(track, 'a')
-                out.write(i+'\n\n')
+                with open(track, 'a') as out:
+                    out.write(i+'\n\n')
 
         if genome:
             if retracks:
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb fw_{0}']).format(track)
-                out=open('genomes_fw.txt', 'w')
-                out.write(gen+'\n')
+                with open('genomes_fw.txt', 'w') as out:
+                    out.write(gen+'\n')
 
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb re_{0}']).format(track)
-                out=open('genomes_re.txt', 'w')
-                out.write(gen+'\n')
+                with open('genomes_re.txt', 'w') as out:
+                    out.write(gen+'\n')
 
             else:
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb {0}']).format(track)
-                out=open('genomes.txt', 'w')
-                out.write(gen+'\n')
+                with open('genomes.txt', 'w') as out:
+                    out.write(gen+'\n')
 
         if hub:
             if retracks:
@@ -257,16 +257,16 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                     'longLabel FW_{1}',
                                     'genomesFile genomes_fw.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                out=open('hub_fw.txt', 'w')
-                out.write(hubtxt+'\n')
+                with open('hub_fw.txt', 'w') as out:
+                    out.write(hubtxt+'\n')
 
                 hubtxt = '\n'.join(['hub re_'+hub,
                                     'shortLabel RE_{0}',
                                     'longLabel RE_{1}',
                                     'genomesFile genomes_re.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                out=open('hub_re.txt', 'w')
-                out.write(hubtxt+'\n')
+                with open('hub_re.txt', 'w') as out:
+                    out.write(hubtxt+'\n')
 
             else:
                 hubtxt = '\n'.join(['hub '+hub,
@@ -274,8 +274,8 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                     'longLabel {1}',
                                     'genomesFile genomes.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                out=open('hub.txt', 'w')
-                out.write(hubtxt+'\n')
+                with open('hub.txt', 'w') as out:
+                    out.write(hubtxt+'\n')
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
         tbe = tb.TracebackException(
