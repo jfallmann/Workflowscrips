@@ -7,9 +7,9 @@
 # Created: Mon Dec  4 09:54:46 2017 (+0100)
 # Version:
 # Package-Requires: ()
-# Last-Updated: Wed Sep 11 18:23:43 2019 (+0200)
+# Last-Updated: Fri Sep 27 10:41:07 2019 (+0200)
 #           By: Joerg Fallmann
-#     Update #: 154
+#     Update #: 159
 # URL:
 # Doc URL:
 # Keywords:
@@ -79,6 +79,7 @@ def parseargs():
     parser.add_argument('-g', '--genome', type=str, help='Genome used for analysis, will be added to genomes.txt')
     parser.add_argument('-b', '--hub', type=str, default='AutogenHub', help='Will generate hub.txt file.')
     parser.add_argument('-m', '--mail', type=str, default='is@egal.com', help='Email of track owner.')
+    parser.add_argument('-i', '--uid', type=str, default='', help='Unique ID for output in case of bulk generation')
     parser.add_argument('-x', '--splitbw', type=bool, default=False, help='Will split into reverse and forward tracks, default is to negate reverse strand values.')
     return parser.parse_args()
 
@@ -86,7 +87,7 @@ def parseargs():
 ###MAIN
 ###############
 
-def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub, mail, splitbw):
+def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub, mail, splitbw, uid):
     try:
         if header and splitbw:
             if not shortlabel:
@@ -113,9 +114,9 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                               'yLineOnOff on',
                               'maxHeightPixels 200:64:32']).format(tr = name, sl = shortlabel, ll = longlabel)
 
-            with open('re_'+track, 'a') as out:
+            with open(uid+'re_'+track, 'a') as out:
                 out.write(head+'\n\n')
-            with open('fw_'+track, 'a') as out:
+            with open(uid+'fw_'+track, 'a') as out:
                 out.write(head+'\n\n')
 
         if filenames == 'STDIN' or filenames == '-':
@@ -220,34 +221,34 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
 
         if len(retracks) > 0:
             for i in retracks:
-                with open('re_'+track, 'a') as out:
+                with open(uid+'re_'+track, 'a') as out:
                     out.write(i+'\n\n')
 
             for i in fwtracks:
-                with open('fw_'+track, 'a') as out:
+                with open(uid+'fw_'+track, 'a') as out:
                     out.write(i+'\n\n')
 
         else:
             for i in fwtracks:
-                with open(track, 'a') as out:
+                with open(uid+track, 'a') as out:
                     out.write(i+'\n\n')
 
         if genome:
             if retracks:
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb fw_{0}']).format(track)
-                with open('genomes_fw.txt', 'w') as out:
+                with open(uid+'genomes_fw.txt', 'w') as out:
                     out.write(gen+'\n')
 
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb re_{0}']).format(track)
-                with open('genomes_re.txt', 'w') as out:
+                with open(uid+'genomes_re.txt', 'w') as out:
                     out.write(gen+'\n')
 
             else:
                 gen = '\n'.join(['genome '+genome,
                                  'trackDb {0}']).format(track)
-                with open('genomes.txt', 'w') as out:
+                with open(uid+'genomes.txt', 'w') as out:
                     out.write(gen+'\n')
 
         if hub:
@@ -257,7 +258,7 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                     'longLabel FW_{1}',
                                     'genomesFile genomes_fw.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                with open('hub_fw.txt', 'w') as out:
+                with open(uid+'hub_fw.txt', 'w') as out:
                     out.write(hubtxt+'\n')
 
                 hubtxt = '\n'.join(['hub re_'+hub,
@@ -265,7 +266,7 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                     'longLabel RE_{1}',
                                     'genomesFile genomes_re.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                with open('hub_re.txt', 'w') as out:
+                with open(uid+'hub_re.txt', 'w') as out:
                     out.write(hubtxt+'\n')
 
             else:
@@ -274,7 +275,7 @@ def main(header, track, shortlabel, longlabel, filenames, name, url, genome, hub
                                     'longLabel {1}',
                                     'genomesFile genomes.txt',
                                     'email {2}']).format(shortlabel, longlabel, mail)
-                with open('hub.txt', 'w') as out:
+                with open(uid+'hub.txt', 'w') as out:
                     out.write(hubtxt+'\n')
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
@@ -296,7 +297,7 @@ def random_color():
 
 if __name__ == '__main__':
     args=parseargs()
-    main(args.header, args.track, args.shortlabel, args.longlabel, args.filenames, args.name, args.baseurl, args.genome, args.hub, args.mail, args.splitbw)
+    main(args.header, args.track, args.shortlabel, args.longlabel, args.filenames, args.name, args.baseurl, args.genome, args.hub, args.mail, args.splitbw, args.uid)
 
 ##################################END################################
 

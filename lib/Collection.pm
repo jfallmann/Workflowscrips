@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-08-28 18:01:12 fall> by joerg
+#Last changed Time-stamp: <2019-09-27 15:55:05 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -942,8 +942,9 @@ sub parse_bedgraph{
 		while(<$BED>){
 			chomp (my $raw = $_);
 			push my @line , split (/\t/,$raw);
-			(my $chromosome = $line[0]) =~ s/\_/./;
-			my $start	   = $line[1];
+			(my $chromosome = $line[0]) =~ s/\_/./g;
+			$chromosome =~ s/\s/./g;
+			my $start = $line[1];
 			my $end;
 			$end = $line[2] if ($line[3]);
 			$end = $start+1 unless (defined $end);#in case of per nucleotide bedgraph
@@ -952,7 +953,9 @@ sub parse_bedgraph{
 			$score = $line[2] unless (defined $score);
 			my $strand;
 			$strand = $line[4] if (defined $line[4]);
+			my $name   = 'u';
 			if ($line[5]){
+				$name = $line[3];
 				$score  = $line[4];
 				$strand  = $line[5];
 			}
@@ -965,7 +968,6 @@ sub parse_bedgraph{
 				$rest = "undef";
 			}
 			my $summit = "$score";
-			my $name   = 'u';
 			$ret->{"$chromosome\_$start\_$end\_$strand"} = "$name\_$score\_$summit\_$rest" unless (defined $ret->{"$chromosome\_$start\_$end\_$strand"});
 
 			$chl->{$chromosome}->{exists} = 1 unless (defined $chl->{$chromosome});
