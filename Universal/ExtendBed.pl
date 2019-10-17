@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #Script ExtendBed.pl;
-#Last changed Time-stamp: <2019-10-17 16:25:34 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2019-10-17 16:50:42 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 ###############
 ###Use stuff
 ###############
@@ -122,7 +122,7 @@ if (-f $o){
     warn "Outputfile $o does exist, will be overwritten!\n";
 }
 
-open (my $Out, ">",$o) or die "$!";
+open (my $Out, ">:gzip",$o) or die "$!";
 
 open (my $Bed, "<:gzip(autopop)",$b) or die "$!";
 my @featurelist; ## This will become a FeatureChain
