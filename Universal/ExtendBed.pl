@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #Script ExtendBed.pl;
-#Last changed Time-stamp: <2019-10-17 16:16:52 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2019-10-17 16:25:34 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 ###############
 ###Use stuff
 ###############
@@ -171,6 +171,7 @@ while(<$Bed>){
 			}
 			if ($d > 0){
 				$end = $tstart;
+				$end += 1 if $tstart == 0;
 				$r = $d;
 			}
 			$right=$l;
