@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 #Script ExtendBed.pl;
-#Last changed Time-stamp: <2019-08-29 17:48:09 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
+#Last changed Time-stamp: <2019-10-17 16:16:52 fall> by Joerg Fallmann <joerg.fallmann@univie.ac.at>
 ###############
 ###Use stuff
 ###############
@@ -137,7 +137,7 @@ while(<$Bed>){
 		push @rest, $original;
 	}
 	$width = 0 if ($d > 0 || $u > 0 || !$e || $l > 0 || $r > 0);
-    $end+=1 if (($end-$start)%2);
+    $end+=1 if (($end-$start)%2) && $width > 0;
 
 	if (defined $m && (($end - $start) >= $m) ){
 		if (@rest){
@@ -170,7 +170,7 @@ while(<$Bed>){
 				$l = $u;
 			}
 			if ($d > 0){
-				$end = $tstart+1;
+				$end = $tstart;
 				$r = $d;
 			}
 			$right=$l;
