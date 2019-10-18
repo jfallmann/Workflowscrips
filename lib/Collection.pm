@@ -1,6 +1,6 @@
 package Collection;
 
-#Last changed Time-stamp: <2019-09-27 15:55:05 fall> by joerg
+#Last changed Time-stamp: <2019-10-18 16:12:54 fall> by joerg
 use strict;
 use Exporter qw(import);
 use Tie::Hash::Indexed; ### Keeping the order
@@ -112,7 +112,7 @@ sub fetch_chrom_sizes{
   }
   else{
 	  print STDERR "Reading chromsizes from $file!\n";
-	  open(my $fh,"<",$file)||die "Could not open $file\n";
+	  open(my $fh,"<:gzip(autopop)",$file)||die "Could not open $file\n";
 	  push @chromsize, <$fh>;
 	  close($fh);
   }
@@ -942,7 +942,7 @@ sub parse_bedgraph{
 		while(<$BED>){
 			chomp (my $raw = $_);
 			push my @line , split (/\t/,$raw);
-			(my $chromosome = $line[0]) =~ s/\_/./g;
+			(my $chromosome = $line[0]) =~ s/\_/=/g;
 			$chromosome =~ s/\s/./g;
 			my $start = $line[1];
 			my $end;
@@ -996,7 +996,7 @@ sub parse_Prepeaks{
 		open(my $pk,"<:gzip(autopop)","$file") || die ("Could not open $file!\n");
 		while(<$pk>){
 			my @line     = split(/\t/,$_);
-			my $chrom   = $line[0];
+			(my $chrom = $line[0]) =~ s/\_/=/g;
 			#	next if ($chrom eq "chrM"); ### No Interest in Mitochondria
 			my $start   = $line[1];
 			my $end     = $line[2];
@@ -2218,7 +2218,7 @@ sub bed_to_coverage{
 		chomp(@lines = <$in>);
 		close($in)
 	}
-	print STDERR "Read ".$#lines." from bed ".$bed."\n";
+	print STDERR "Read ".$#lines." lines from bed ".$bed."\n";
 	$totalreads = $#lines;
 
 	foreach my $raw (@lines){
@@ -2277,8 +2277,14 @@ sub bed_to_coverage{
 				foreach my $pos (@pro){
 					my @bla = split (/\:/,$pos);
 					my $check = $bla[0]+$nu-1;
-					next if (defined $poscov{"$check"});
-					next if ($check >= ($sizes->{$chrom})-1);
+					if (defined $poscov{$check}){
+						print STDERR "$check already defined";
+						next;
+					}
+					if ($check >= ($sizes->{$chrom})-1){
+						print STDERR "$check greater than size of $chrom with $sizes->{$chrom}";
+						next;
+					}
 					if ($bla[0] == 1){
 						$poscov{"$nu"} = $bla[1] unless (defined $poscov{"$nu"});
 						$nu++;
@@ -2290,7 +2296,6 @@ sub bed_to_coverage{
 						}
 					}
 				}
-
 				for (my $i=$cstart;$i<=$cend;$i++){
 					if ($strand eq "+" or $strand eq "1" or $strand eq "u" or $strand eq "=" or $strand eq "."){
 						$covplus{"$chrom"}{"$i"}+=$poscov{"$i"} if (defined $poscov{"$i"});

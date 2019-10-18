@@ -29,7 +29,7 @@ pod2usage(-verbose => 0)
 $dir = cwd() unless ($dir);
 $odir =~ s/$odir/\Q$odir\E/g if($odir);
 $odir = "$dir"."\/Subpeaks" unless ($odir);
-$filter = s/$filter/\Q$filter\E/g if($filter);
+$filter = qr(\Q$filter\E) if($filter);
 
 my $pid = $$;
 (my $job = `cat /proc/$pid/cmdline`)=~ s/\0/ /g;
@@ -50,7 +50,7 @@ print STDERR "Printing bed with profile\n";
 foreach my $pk (keys %{$unique}){
 	my @tempuni = split(/\_/,$pk);
 	push @tempuni , split(/\_/,$unique->{$pk});
-	my $chromosome = $tempuni[0];
+	(my $chromosome = $tempuni[0])=~ s/=/\_/g;
 	my $start      = $tempuni[1];
 	my $end        = $tempuni[2];
 	my $strand     = $tempuni[3];

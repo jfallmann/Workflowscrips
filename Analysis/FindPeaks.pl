@@ -96,7 +96,7 @@ my $finalpeaks = Collection::merge_peak_areas($finalpks,$finalmerged);
 foreach my $newpeak ( keys %{$finalpeaks}){
     my @tmp     = split(/\_/,$newpeak);
     push @tmp,  split(/\_/,$finalpeaks->{$newpeak});
-    my $chrom   = $tmp[0];
+    (my $chrom   = $tmp[0]) =~ s/=/\_/g;
     my $strand  = $tmp[1];
     $strand     = '.' if ($strand eq 'u');
     my $start   = $tmp[2];
