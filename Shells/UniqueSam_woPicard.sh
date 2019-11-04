@@ -13,11 +13,11 @@ then
     samtools view -H <(zcat $in)|grep '@SQ'|sort -t$'\t' -k1,1 -k2,2V |pigz -p $threads -f >> $out
     samtools view -H <(zcat $in)|grep '@RG'|pigz -p $threads -f >> $out
     samtools view -H <(zcat $in)|grep '@PG'|pigz -p $threads -f >> $out
-    zcat $in|grep -v "^@"| grep -w "NH:i:1" |pigz >> $out
+    zcat $in|grep -v "^@"| grep -w -P "NH:i:1|tp:A:P" |pigz >> $out
 else
     samtools view -H <(cat $in)|grep '@HD' |pigz -p $threads -f > $out
     samtools view -H <(cat $in)|grep '@SQ'|sort -t$'\t' -k1,1 -k2,2V |pigz -p $threads -f >> $out
     samtools view -H <(cat $in)|grep '@RG'|pigz -p $threads -f >> $out
     samtools view -H <(cat $in)|grep '@PG'|pigz -p $threads -f >> $out
-    cat $in|grep -v "^@"| grep -w "NH:i:1" |pigz >> $out
+    cat $in|grep -v "^@"| grep -w -P "NH:i:1|tp:A:P" |pigz >> $out
 fi
