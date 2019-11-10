@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 
-import sys, argparse, os, inspect, traceback, gzip
+import sys, argparse, os, inspect, traceback, gzip, glob
 
 cmd_subfolder = os.path.join(os.path.dirname(os.path.realpath(os.path.abspath(inspect.getfile( inspect.currentframe() )) )),"../../lib")
 if cmd_subfolder not in sys.path:
@@ -18,6 +18,8 @@ def parseargs():
     parser.add_argument("-c", "--conditions", required=True, type=str, help="Conditions to compare" )
     parser.add_argument("-r", "--replicates", required=True, type=str, help="Replicates belonging to conditions" )
     parser.add_argument("--cutoff", dest='cutoff', type=int, default=0 ,help="cutoff for minimum count" )
+    parser.add_argument("--table", dest='table', required=True, type=str, default='counts.table' ,help="Name of table to write to" )
+    parser.add_argument("--anno", dest='anno', required=True, type=str, default='counts.anno' ,help="Name of anno to write to" )
     parser.add_argument("--loglevel", default='INFO', help="Log verbosity" )
 
     if len(sys.argv)==1:
@@ -37,12 +39,22 @@ class Sample_list(object):
         self.replicate_names = list()
         self.replicate_paths = list()
 
-def prepare_table(slist, conditions, replicates, sample_name=None, order=None, cutoff=None):
+def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, order=None, cutoff=None):
     try:
         logid = scriptname+'.prepare_table: '
         log.info(logid+'LIST: '+str(slist))
         my_groups={}
         list_size=0
+
+        # CLEANUP
+        oldtab = os.path.abspath(table)
+        oldanno = os.path.abspath(anno)
+        for oldfile in glob.glob(oldtab):
+            os.rename(oldfile,oldfile+'.bak')
+            log.warning(logid+'Found old DE table file'+oldfile+', was moved to '+oldfile+'.bak')
+        for oldfile in glob.glob(oldanno):
+            os.rename(oldfile,oldfile+'.bak')
+            log.warning(logid+'Found old DE anno file'+oldfile+', was moved to '+oldfile+'.bak')
 
         samplelist = str(slist).strip().split(',')
         replist = str(replicates).strip().split(',')
@@ -55,7 +67,7 @@ def prepare_table(slist, conditions, replicates, sample_name=None, order=None, c
             rep = None
             cond = None
             for i in range(len(replist)):
-                if replist[i] in sample:
+                if replist[i]+'_mapped_sorted_unique.counts' in sample:
                     rep = str(replist[i])
                     cond = str(condlist[i])
                     break
@@ -92,16 +104,17 @@ def prepare_table(slist, conditions, replicates, sample_name=None, order=None, c
 
         for gruppies in conds:
             condition_index=-1
-
+            rep_nr=0
             for replicates in my_groups[gruppies].replicate_paths:
                 log.info(logid+'Processing: '+str(replicates))
                 condition_index +=1
                 sample_counter+=1
+                rep_nr+=1
 
                 if (sample_name):
                     myMatrix[0].append(my_groups[gruppies].replicate_names[condition_index])
                 else:
-                    myMatrix[0].append(my_groups[gruppies].group_name)
+                    myMatrix[0].append(str(my_groups[gruppies].group_name)+'_'+str(rep_nr))
                 if '.gz' in replicates:
                     myInput = gzip.open(replicates,'r')
                 else:
@@ -118,12 +131,20 @@ def prepare_table(slist, conditions, replicates, sample_name=None, order=None, c
                             newListi=[]
                             myMatrix.append(newListi)
                             myMatrix[lineNumber].append("l_"+str(lineNumber)+"_"+str(columns[0]))
-                        myMatrix[lineNumber].append(columns[-1])
+                        myMatrix[lineNumber].append(round(float(columns[-1])))
 
         line = "\t".join(myMatrix[0])
-        print(str(line),file=sys.stdout)
+        annos = list()
 
-        log.info(logid+'MATRIX: '+str(myMatrix))
+        for c in myMatrix[0][1:]:
+            #a = ''.join([i for i in c if not i.isdigit()])
+            a = str.join('_',str(c).split('_')[:-1])
+            annos.append(str(c)+'fb\t'+str(a))
+
+        with open(table, 'w') as t:
+            print(str(line),file=t)
+        with open(anno, 'w') as a:
+            print('\n'.join(annos),file=a)
 
         for z in range(1,len(myMatrix)):
             zeilen = myMatrix[z]
@@ -134,7 +155,8 @@ def prepare_table(slist, conditions, replicates, sample_name=None, order=None, c
                 if (int(zeilen[x]) >= cutoff):
                     willprint = True
             if willprint:
-                print(str(line),file=sys.stdout)
+                with open(table, 'a') as t:
+                    print(str(line),file=t)
 
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
@@ -161,7 +183,7 @@ if __name__ == '__main__':
         log = setup_logger(name=scriptname, log_file='LOGS/'+scriptname+'.log', logformat='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M', level=args.loglevel)
         log.addHandler(logging.StreamHandler(sys.stderr))  # streamlog
 
-        prepare_table(args.list, args.conditions, args.replicates, args.sample_name, args.order, args.cutoff)
+        prepare_table(args.list, args.conditions, args.replicates, args.table, args.anno, args.sample_name, args.order, args.cutoff)
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
         tbe = tb.TracebackException(

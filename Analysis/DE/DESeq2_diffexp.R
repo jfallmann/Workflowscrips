@@ -4,6 +4,8 @@ args <- commandArgs(trailingOnly = TRUE)
 
 anname<-args[1]
 inname<-args[2]
+outcsv<-args[3]
+outdir<-args[4]
 
 anno <- as.matrix(read.table(anname,row.names=1))
 colnames(anno) <- c("condition")
@@ -20,6 +22,9 @@ all(rownames(anno) == colnames(countData))
 dds <- DESeqDataSetFromMatrix(countData = countData,
                               colData = anno,
                               design= ~ condition)
+
+#switch working directory
+setwd(outdir)
 
 #filter low counts
 keep <- rowSums(counts(dds)) >= 10
@@ -54,7 +59,7 @@ resOrdered <- res[order(res$log2FoldChange),]
 pdf(paste(inname,"DESeq2","plot.pdf",sep="_"))
 plotMA(res, ylim=c(-3,3))
 dev.off()
-write.table(as.data.frame(resOrdered), file=paste(inname,"DESeq2.txt",sep="_"), sep="\t")
+write.table(as.data.frame(resOrdered), file=paste(outcsv), sep="\t")
 
 ###
 #Now we want to transform the raw discretely distributed counts so that we can do clustering. (Note: when you expect a large treatment effect you should actually set blind=FALSE (see https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html).
