@@ -91,7 +91,7 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
 
         myMatrix = []
         myMatrix.append([])
-        myMatrix[0].append("names")
+        myMatrix[0].append('')
         sample_counter=0
 
         conds = []
@@ -139,7 +139,7 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
         for c in myMatrix[0][1:]:
             #a = ''.join([i for i in c if not i.isdigit()])
             a = str.join('_',str(c).split('_')[:-1])
-            annos.append(str(c)+'fb\t'+str(a))
+            annos.append(str(c)+'\t'+str(a))
 
         with open(table, 'w') as t:
             print(str(line),file=t)

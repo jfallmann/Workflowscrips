@@ -23,9 +23,6 @@ dds <- DESeqDataSetFromMatrix(countData = countData,
                               colData = anno,
                               design= ~ condition)
 
-#switch working directory
-setwd(outdir)
-
 #filter low counts
 keep <- rowSums(counts(dds)) >= 10
 dds <- dds[keep,]
