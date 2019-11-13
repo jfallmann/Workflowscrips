@@ -8,15 +8,13 @@ anname<-args[1]
 inname<-args[2]
 outdir<-args[3]
 
-anno <- as.matrix(read.table(anname,row.names=1))
+anno <- as.matrix(read.table(gzfile(anname),row.names=1))
 colnames(anno) <- c("condition")
 anno <- as.data.frame(anno)
 head(anno)
 condcomb<-as.data.frame(combn(unique(anno$condition),2))[1:2,]
-condcomb
-
-countData <- as.matrix(read.table(inname,header=T,row.names=1))
-head(countData)
+countData <- as.matrix(read.table(gzfile(inname),header=T,row.names=1))
+#head(countData)
 
 setwd(outdir)
 
@@ -35,29 +33,33 @@ dds <- dds[keep,]
 #run for each pair of conditions
 dds <- DESeq(dds)
 
+dds$condition
+resultsNames(dds)
+
 for (n in 1:ncol(condcomb)){
-        cname=paste(levels(condcomb[,n]),collapse='_vs_')
-        print(cname)
 
-        res <- results(dds,contrast=c("condition",levels(condcomb[,n])), name=paste(levels(condcomb[,n]),collapse='_vs_'))
+    cname=""
+    cname=paste(condcomb[,n],collapse='_vs_')
+    print(cname)
 
-        #sort and output
-        resOrdered <- res[order(res$log2FoldChange),]
-        #write the table to a csv file
+    res <- results(dds,contrast=c("condition",as.character(condcomb[1,n]),as.character(condcomb[2,n])))#, name=paste(condcomb[,n],collapse='_vs_'))
+                                            #sort and output
+    resOrdered <- res[order(res$log2FoldChange),]
+                                        #write the table to a csv file
 
-        pdf(paste(cname,"DESeq2","plot.pdf",sep="_"))
-        plotMA(res, ylim=c(-3,3))
-        dev.off()
-        write.table(as.data.frame(resOrdered), gzfile(paste(cname,'.csv.gz',sep="")), sep="\t")
+    pdf(paste(cname,"DESeq2","plot.pdf",sep="_"))
+    plotMA(res, ylim=c(-3,3))
+    dev.off()
+    write.table(as.data.frame(resOrdered), gzfile(paste(cname,'.csv.gz',sep="")), sep="\t")
 
-        ###
-        #Now we want to transform the raw discretely distributed counts so that we can do clustering. (Note: when you expect a large treatment effect you should actually set blind=FALSE (see https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html).
-        rld<- rlogTransformation(dds, blind=TRUE)
-        vsd<-varianceStabilizingTransformation(dds, blind=TRUE)
+###
+                                        #Now we want to transform the raw discretely distributed counts so that we can do clustering. (Note: when you expect a large treatment effect you should actually set blind=FALSE (see https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html).
+    rld<- rlogTransformation(dds, blind=TRUE)
+    vsd<-varianceStabilizingTransformation(dds, blind=TRUE)
 
-        #We also write the normalized counts to file
-        write.table(as.data.frame(assay(rld)), gzfile(paste(cname,"DESeq2_rld.txt.gz",sep="_")), sep="\t", col.names=NA)
-        write.table(as.data.frame(assay(vsd)), gzfile(paste(cname,"DESeq2_vsd.txt.gz",sep="_")), sep="\t", col.names=NA)
+                                        #We also write the normalized counts to file
+    write.table(as.data.frame(assay(rld)), gzfile(paste(cname,"DESeq2_rld.txt.gz",sep="_")), sep="\t", col.names=NA)
+    write.table(as.data.frame(assay(vsd)), gzfile(paste(cname,"DESeq2_vsd.txt.gz",sep="_")), sep="\t", col.names=NA)
 
 }
 

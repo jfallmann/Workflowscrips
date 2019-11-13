@@ -141,10 +141,10 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
             a = str.join('_',str(c).split('_')[:-1])
             annos.append(str(c)+'\t'+str(a))
 
-        with open(table, 'w') as t:
-            print(str(line),file=t)
-        with open(anno, 'w') as a:
-            print('\n'.join(annos),file=a)
+        with gzip.open(table, 'wb') as t:
+            print(bytes(str(line),encoding='UTF8'),file=t)
+        with gzip.open(anno, 'wb') as a:
+            print(bytes('\n'.join(annos),encoding='UTF-8'),file=a)
 
         for z in range(1,len(myMatrix)):
             zeilen = myMatrix[z]
@@ -155,8 +155,8 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
                 if (int(zeilen[x]) >= cutoff):
                     willprint = True
             if willprint:
-                with open(table, 'a') as t:
-                    print(str(line),file=t)
+                with gzip.open(table, 'ab') as t:
+                    print(bytes(str(line),encoding='UTF8'),file=t)
 
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
