@@ -142,7 +142,7 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
             annos.append(str(c)+'\t'+str(a))
 
         with gzip.open(table, 'wb') as t:
-            t.write(bytes(str(line),encoding='UTF8'))
+            t.write(bytes(str(line)+'\n',encoding='UTF8'))
         with gzip.open(anno, 'wb') as a:
             a.write(bytes('\n'.join(annos),encoding='UTF-8'))
 
@@ -156,7 +156,7 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
                     willprint = True
             if willprint:
                 with gzip.open(table, 'ab') as t:
-                    t.write(bytes(str(line),encoding='UTF8'))
+                    t.write(bytes(str(line)+'\n',encoding='UTF8'))
 
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
