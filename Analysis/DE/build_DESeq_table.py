@@ -142,9 +142,9 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
             annos.append(str(c)+'\t'+str(a))
 
         with gzip.open(table, 'wb') as t:
-            print(bytes(str(line),encoding='UTF8'),file=t)
+            t.write(bytes(str(line),encoding='UTF8'))
         with gzip.open(anno, 'wb') as a:
-            print(bytes('\n'.join(annos),encoding='UTF-8'),file=a)
+            a.write(bytes('\n'.join(annos),encoding='UTF-8'))
 
         for z in range(1,len(myMatrix)):
             zeilen = myMatrix[z]
@@ -156,7 +156,7 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
                     willprint = True
             if willprint:
                 with gzip.open(table, 'ab') as t:
-                    print(bytes(str(line),encoding='UTF8'),file=t)
+                    t.write(bytes(str(line),encoding='UTF8'))
 
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
