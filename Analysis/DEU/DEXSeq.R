@@ -4,6 +4,7 @@
 
 suppressPackageStartupMessages({
     require(DEXSeq)
+    require(dplyr)
 })
 
 args <- commandArgs(trailingOnly = TRUE)
@@ -14,7 +15,7 @@ outdir<-args[3]
 
 anname<-'RUN_DE_Analysis.anno.gz'
 countfile<-''
-outdir<-'/home/fall/Work/Alzheimer/DEU/DEXManual/Tables'
+outdir<-'/home/fall/Offlinework/Alzheimer/DEXManual/Tables'
 
 
 ## Annotation
