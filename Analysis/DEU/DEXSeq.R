@@ -12,15 +12,20 @@ anname<-args[1]
 countfile<-args[2]
 outdir<-args[3]
 
+anname<-'RUN_DE_Analysis.anno.gz'
+countfile<-''
+outdir<-'/home/fall/Work/Alzheimer/DEU/DEXManual/Tables'
+
+
 ## Annotation
 sampleData <- as.matrix(read.table(gzfile(anname),row.names=1))
-colnames(sampleData) <- c("condition")
-sampleData <- as.data.frame(SampleData)
-head(anno)
+colnames(sampleData) <- c("condition","type")
+sampleData <- as.data.frame(sampleData)
+head(sampleData)
 ## Combinations of conditions
-condcomb<-as.data.frame(combn(unique(anno$condition),2))[1:2,]
-                                        #countfile <- as.matrix(read.table(gzfile(inname),header=T,row.names=1))
-                                        #head(countData)
+condcomb<-as.data.frame(combn(unique(sampleData$condition),2))[1:2,]
+##countfile <- as.matrix(read.table(gzfile(inname),header=T,row.names=1))
+##head(countData)
 
 setwd(outdir)
 
@@ -29,7 +34,7 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
                                             design = ~sample + exon + condition:exon, flattenedfile = NULL)
 
 {
-                                        # Take a fcount file and convert it to dcounts for dexseq
+    ##  Take a fcount file and convert it to dcounts for dexseq
     message("Reading and adding Exon IDs for DEXSeq")
     read.table(countfile,skip = 2) %>% dplyr::arrange(V1,V3,V4) %>% dplyr::select(-(V2:V6)) -> dcounts
     colnames(dcounts) <- c("GeneID", rownames(sampleData) )
@@ -97,8 +102,30 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
 
 }
 
+
 for (n in 1:ncol(condcomb)){
 
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
+    
+    dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + exon + condition:exon, flattenedfile = NULL)
+    
+    dxd = estimateSizeFactors( dxd )
+    dxd = estimateDispersions( dxd )
+    
+    pdf(paste(cname,"DEXSeq","DispEsts.pdf",sep="_"))
+    plotDispEsts( dxd )
+    dev.off()
+    
+    dxd = testForDEU( dxd )
+    
+    dxd = estimateExonFoldChanges( dxd, fitExpToVar="condition")
+    
+    dxr1 = DEXSeqResults( dxd )
+    
+    DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80") )
+    
+}
+    
+    
