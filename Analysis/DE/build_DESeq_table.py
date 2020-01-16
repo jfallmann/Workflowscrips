@@ -16,6 +16,7 @@ def parseargs():
     parser.add_argument("-n", "--sample_name", action="store_true", help=" provide -n if sample names instead of group names should be used for header" )
     parser.add_argument("-o", "--order", action="store_true", help="if wanted the order of conditions can be given as comma separated list" )
     parser.add_argument("-c", "--conditions", required=True, type=str, help="Conditions to compare" )
+    parser.add_argument("-t", "--types", required=False, default=None, type=str, help="Sequencing types to compare" )
     parser.add_argument("-r", "--replicates", required=True, type=str, help="Replicates belonging to conditions" )
     parser.add_argument("--cutoff", dest='cutoff', type=int, default=0 ,help="cutoff for minimum count" )
     parser.add_argument("--table", dest='table', required=True, type=str, default='counts.table' ,help="Name of table to write to" )
@@ -38,8 +39,9 @@ class Sample_list(object):
         self.group_name = group_name
         self.replicate_names = list()
         self.replicate_paths = list()
+        self.replicate_types = list()
 
-def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, order=None, cutoff=None):
+def prepare_table(slist, conditions, replicates, types, table, anno, sample_name=None, order=None, cutoff=None):
     try:
         logid = scriptname+'.prepare_table: '
         log.info(logid+'LIST: '+str(slist))
@@ -58,7 +60,8 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
 
         samplelist = str(slist).strip().split(',')
         replist = str(replicates).strip().split(',')
-        condlist = str(conditions).strip().split(',')
+        typelist = str(types).strip().split(',') if types else None
+        condlist = str(conditions).strip().split(',')#libtype!
         log.info(logid+'SAMPLES: '+str(samplelist))
         log.info(logid+'REPS: '+str(replist))
         log.info(logid+'CONDS: '+str(condlist))
@@ -66,10 +69,12 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
         for sample in samplelist:
             rep = None
             cond = None
+            type = None
             for i in range(len(replist)):
                 if replist[i]+'_mapped_sorted_unique.counts' in sample:
                     rep = str(replist[i])
                     cond = str(condlist[i])
+                    typ = str(typelist[i])
                     break
             if not rep or not cond:
                 log.warning(logid+'No rep/cond found for sample '+str(sample))
@@ -82,10 +87,12 @@ def prepare_table(slist, conditions, replicates, table, anno, sample_name=None, 
             if cond in my_groups:
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
+                my_groups[cond].replicate_types.append(typ) if typ
             else:
                 my_groups[cond]=make_sample_list(cond)
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
+                my_groups[cond].replicate_types.append(typ) if typ
 
         log.info(logid+'MyGroups: '+str(my_groups.keys()))
 
@@ -183,7 +190,7 @@ if __name__ == '__main__':
         log = setup_logger(name=scriptname, log_file='LOGS/'+scriptname+'.log', logformat='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M', level=args.loglevel)
         log.addHandler(logging.StreamHandler(sys.stderr))  # streamlog
 
-        prepare_table(args.list, args.conditions, args.replicates, args.table, args.anno, args.sample_name, args.order, args.cutoff)
+        prepare_table(args.list, args.conditions, args.replicates, args.types, args.table, args.anno, args.sample_name, args.order, args.cutoff)
     except Exception as err:
         exc_type, exc_value, exc_tb = sys.exc_info()
         tbe = tb.TracebackException(
