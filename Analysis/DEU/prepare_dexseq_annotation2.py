@@ -23,12 +23,6 @@ optParser.add_option( "-r", "--aggregate", type="choice", dest="aggregate",
                       choices = ( "no", "yes" ), default = "yes",
                       help = "'yes' or 'no'. Indicates whether two or more genes sharing an exon should be merged into an 'aggregate gene'. If 'no', the exons that can not be assiged to a single gene are ignored." )
 
-# add option for featurecounts output
-optParser.add_option( "-f", "--featurecountsgtf", type="string", dest="fcgtf", action = "store",
-                      help = "gtf file to write for featurecounts." )
-
-##
-
 (opts, args) = optParser.parse_args()
 
 if len( args ) != 2:
@@ -36,17 +30,14 @@ if len( args ) != 2:
     sys.stderr.write( "Usage: python %s <in.gtf> <out.gff>\n\n" % os.path.basename(sys.argv[0]) )
     sys.stderr.write( "This script takes an annotation file in Ensembl GTF format\n" )
     sys.stderr.write( "and outputs a 'flattened' annotation file suitable for use\n" )
-    sys.stderr.write( "with the count_in_exons.py script.\n" )
+    sys.stderr.write( "with featurecount.\n" )
     sys.exit(1)
 
 try:
     import HTSeq
 except ImportError:
     sys.stderr.write( "Could not import HTSeq. Please install the HTSeq Python framework\n" )
-    sys.stderr.write( "available from http://www-huber.embl.de/users/anders/HTSeq\n" )
     sys.exit(1)
-
-
 
 
 gtf_file = args[0]
@@ -119,7 +110,7 @@ for iv, s in exons.steps( ):
         assert set( gene_id for gene_id, transcript_id in s ) <= gene_sets[ gene_id ]
         aggregate_id = '+'.join( gene_sets[ gene_id ] )
         # Make the feature and store it in 'aggregates'
-    f = HTSeq.GenomicFeature( aggregate_id, "exonic_part", iv )
+    f = HTSeq.GenomicFeature( aggregate_id, "exon", iv )
     f.source = os.path.basename( sys.argv[0] )
     #   f.source = "camara"
     f.attr = {}
@@ -144,13 +135,13 @@ for l in aggregates.values():
             raise ValueError(
                 "Same name found on two strands: %s, %s" % ( str(l[i]), str(l[i+1]) )
             )
-        aggr_feat = HTSeq.GenomicFeature( l[0].name, "aggregate_gene",
+        aggr_feat = HTSeq.GenomicFeature( l[0].name, "gene",
                                           HTSeq.GenomicInterval( l[0].iv.chrom, l[0].iv.start,
                                                                  l[-1].iv.end, l[0].iv.strand ) )
         aggr_feat.source = os.path.basename( sys.argv[0] )
         aggr_feat.attr = { 'gene_id': aggr_feat.name }
     for i in range( len(l) ):
-        l[i].attr['exonic_part_number'] = "%03d" % ( i+1 )
+        l[i].attr['exon_number'] = "%03d" % ( i+1 )
         aggregate_features.append( aggr_feat )
 
 
@@ -171,13 +162,3 @@ else:
             fout.write( aggr_feat.get_gff_line() )
         for f in aggregates[ aggr_feat.name ]:
             fout.write( f.get_gff_line() )
-
-## modify file to print gtf if featurecounts gtf requested
-fcountgtf = opts.fcgtf
-
-if fcountgtf :
-    os.system('sed s/aggregate_gene/gene/g ' + out_file + ' > ' + fcountgtf)
-    os.system('sed -i s/exonic_part/exon/g ' + fcountgtf)
-    print("Done!")
-else :
-    print("Done!")
