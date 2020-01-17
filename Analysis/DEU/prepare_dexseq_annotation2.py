@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Code from:https://github.com/vivekbhr/Subread_to_DEXSeq
 
-import sys, collections, itertools, os.path, optparse, os # changed here to add sed
+import sys, collections, itertools, os.path, optparse, os, gzip # changed here to add sed
 
 optParser = optparse.OptionParser(
 
@@ -158,13 +158,19 @@ for l in aggregates.values():
 
 aggregate_features.sort( key = lambda f: ( f.iv.chrom, f.iv.start ) )
 
-fout = open( out_file, "w" )
-for aggr_feat in aggregate_features:
-    fout.write( aggr_feat.get_gff_line() )
-   for f in aggregates[ aggr_feat.name ]:
-       fout.write( f.get_gff_line() )
+if '.gz' in out_file:
+    with gzip.open( out_file, "wb" ) as fout:
+        for aggr_feat in aggregate_features:
+            fout.write( bytes(aggr_feat.get_gff_line() ),encoding='UTF8')
+        for f in aggregates[ aggr_feat.name ]:
+            fout.write( bytes(f.get_gff_line() ),encoding='UTF8')
 
-fout.close()
+else:
+    with open( out_file, "w" ) as fout:
+        for aggr_feat in aggregate_features:
+            fout.write( aggr_feat.get_gff_line() )
+        for f in aggregates[ aggr_feat.name ]:
+            fout.write( f.get_gff_line() )
 
 ## modify file to print gtf if featurecounts gtf requested
 fcountgtf = opts.fcgtf
