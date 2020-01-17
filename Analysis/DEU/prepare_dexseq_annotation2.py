@@ -1,5 +1,5 @@
-# Code from:https://github.com/vivekbhr/Subread_to_DEXSeq
 #!/usr/bin/env python
+# Code from:https://github.com/vivekbhr/Subread_to_DEXSeq
 
 import sys, collections, itertools, os.path, optparse, os # changed here to add sed
 
