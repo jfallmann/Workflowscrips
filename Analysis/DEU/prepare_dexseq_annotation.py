@@ -62,8 +62,6 @@ def reformat(gff=None, outgff=None):
                 else:
                     out.append(line)
 
-        print('OUTPUT: '+str.join('\n',out[-50:]))
-
         if '.gz' in outgff:
             with gzip.open(outgff,'wb') as output:
                 output.write(bytes(str.join('\n',out),encoding='UTF-8'))
