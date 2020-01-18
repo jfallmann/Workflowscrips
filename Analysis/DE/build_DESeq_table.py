@@ -138,7 +138,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
                             newListi=[]
                             myMatrix.append(newListi)
                             #myMatrix[lineNumber].append("l_"+str(lineNumber)+"_"+str(columns[0]))
-                            myMatrix[lineNumber].append(str(columns[0])
+                            myMatrix[lineNumber].append(str(columns[0]))
                         myMatrix[lineNumber].append(round(float(columns[-1])))
 
         line = "\t".join(myMatrix[0])

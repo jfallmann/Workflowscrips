@@ -69,12 +69,12 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
         for sample in samplelist:
             rep = None
             cond = None
-            type = None
+            typ = None
             for i in range(len(replist)):
                 if replist[i]+'_mapped_sorted_unique.counts' in sample:
                     rep = str(replist[i])
                     cond = str(condlist[i])
-                    typ = str(typelist[i])
+                    typ = str(typelist[i]) if types else None
                     break
             if not rep or not cond:
                 log.warning(logid+'No rep/cond found for sample '+str(sample))
@@ -87,12 +87,14 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
             if cond in my_groups:
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
-                my_groups[cond].replicate_types.append(typ) if typ
+                if typ is not None:
+                    my_groups[cond].replicate_types.append(typ)
             else:
                 my_groups[cond]=make_sample_list(cond)
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
-                my_groups[cond].replicate_types.append(typ) if typ
+                if typ is not None:
+                    my_groups[cond].replicate_types.append(typ)
 
         log.info(logid+'MyGroups: '+str(my_groups.keys()))
 
@@ -137,8 +139,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
                         if sample_counter==1:
                             newListi=[]
                             myMatrix.append(newListi)
-                            #myMatrix[lineNumber].append("l_"+str(lineNumber)+"_"+str(columns[0]))
-                            myMatrix[lineNumber].append(str(columns[0])
+                            myMatrix[lineNumber].append(str(columns[0]))
                         myMatrix[lineNumber].append(round(float(columns[-1])))
 
         line = "\t".join(myMatrix[0])
