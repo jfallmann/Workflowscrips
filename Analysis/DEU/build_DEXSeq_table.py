@@ -60,7 +60,7 @@ def prepare_table(slist, conditions, replicates, types=None, table, anno, sample
 
         samplelist = str(slist).strip().split(',')
         replist = str(replicates).strip().split(',')
-        typelist = str(types).strip().split(',') if types is not None
+        typelist = str(types).strip().split(',') if types
         condlist = str(conditions).strip().split(',')#libtype!
         log.info(logid+'SAMPLES: '+str(samplelist))
         log.info(logid+'REPS: '+str(replist))
@@ -74,7 +74,7 @@ def prepare_table(slist, conditions, replicates, types=None, table, anno, sample
                 if replist[i]+'_mapped_sorted_unique.counts' in sample:
                     rep = str(replist[i])
                     cond = str(condlist[i])
-                    typ = str(typelist[i]) if types is not None
+                    typ = str(typelist[i]) if types
                     break
             if not rep or not cond:
                 log.warning(logid+'No rep/cond found for sample '+str(sample))
@@ -93,7 +93,7 @@ def prepare_table(slist, conditions, replicates, types=None, table, anno, sample
                 my_groups[cond]=make_sample_list(cond)
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
-                if typ is not None:
+                if typ:
                     my_groups[cond].replicate_types.append(typ)
 
         log.info(logid+'MyGroups: '+str(my_groups.keys()))
@@ -152,7 +152,7 @@ def prepare_table(slist, conditions, replicates, types=None, table, anno, sample
             c = myMatrix[0][i]
             #a = ''.join([i for i in c if not i.isdigit()])
             a = str.join('_',str(c).split('_')[:-1])
-            a += '\t'+str(typeanno[i]) if types is not None
+            a += '\t'+str(typeanno[i]) if types
             annos.append(str(c)+'\t'+str(a))
 
         with gzip.open(table, 'wb') as t:
