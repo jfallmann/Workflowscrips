@@ -16,7 +16,7 @@ def parseargs():
     parser.add_argument("-n", "--sample_name", action="store_true", help=" provide -n if sample names instead of group names should be used for header" )
     parser.add_argument("-o", "--order", action="store_true", help="if wanted the order of conditions can be given as comma separated list" )
     parser.add_argument("-c", "--conditions", required=True, type=str, help="Conditions to compare" )
-    parser.add_argument("-t", "--types", required=False, default=None, type=str, help="Sequencing types to compare" )
+    parser.add_argument("-t", "--types", required=False, type=str, help="Sequencing types to compare" )
     parser.add_argument("-r", "--replicates", required=True, type=str, help="Replicates belonging to conditions" )
     parser.add_argument("--cutoff", dest='cutoff', type=int, default=0 ,help="cutoff for minimum count" )
     parser.add_argument("--table", dest='table', required=True, type=str, default='counts.table' ,help="Name of table to write to" )
@@ -41,7 +41,7 @@ class Sample_list(object):
         self.replicate_paths = list()
         self.replicate_types = list()
 
-def prepare_table(slist, conditions, replicates, types, table, anno, sample_name=None, order=None, cutoff=None):
+def prepare_table(slist, conditions, replicates, types=None, table, anno, sample_name=None, order=None, cutoff=None):
     try:
         logid = scriptname+'.prepare_table: '
         log.info(logid+'LIST: '+str(slist))
@@ -60,7 +60,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
 
         samplelist = str(slist).strip().split(',')
         replist = str(replicates).strip().split(',')
-        typelist = str(types).strip().split(',') if types else None
+        typelist = str(types).strip().split(',') if types is not None
         condlist = str(conditions).strip().split(',')#libtype!
         log.info(logid+'SAMPLES: '+str(samplelist))
         log.info(logid+'REPS: '+str(replist))
@@ -74,7 +74,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
                 if replist[i]+'_mapped_sorted_unique.counts' in sample:
                     rep = str(replist[i])
                     cond = str(condlist[i])
-                    typ = str(typelist[i]) if types else None
+                    typ = str(typelist[i]) if types is not None
                     break
             if not rep or not cond:
                 log.warning(logid+'No rep/cond found for sample '+str(sample))
@@ -87,7 +87,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
             if cond in my_groups:
                 my_groups[cond].replicate_paths.append(sample)
                 my_groups[cond].replicate_names.append(rep)
-                if typ is not None:
+                if typ:
                     my_groups[cond].replicate_types.append(typ)
             else:
                 my_groups[cond]=make_sample_list(cond)
@@ -110,7 +110,7 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
             conds = [x for x in my_groups.keys()]
 
         log.info(logid+'CONDS: '+str(conds))
-
+        typeanno = list()
         for gruppies in conds:
             condition_index=-1
             rep_nr=0
@@ -122,8 +122,10 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
 
                 if (sample_name):
                     myMatrix[0].append(my_groups[gruppies].replicate_names[condition_index])
+                    typeanno.append(my_groups[gruppies].replicate_types[condition_index])
                 else:
                     myMatrix[0].append(str(my_groups[gruppies].group_name)+'_'+str(rep_nr))
+                    typeanno.append(my_groups[gruppies].replicate_types[condition_index])
                 if '.gz' in replicates:
                     myInput = gzip.open(replicates,'r')
                 else:
@@ -145,9 +147,12 @@ def prepare_table(slist, conditions, replicates, types, table, anno, sample_name
         line = "\t".join(myMatrix[0])
         annos = list()
 
-        for c in myMatrix[0][1:]:
+        for i in range(len(myMatrix[0])):
+        #for c in myMatrix[0][1:]:
+            c = myMatrix[0][i]
             #a = ''.join([i for i in c if not i.isdigit()])
             a = str.join('_',str(c).split('_')[:-1])
+            a += '\t'+str(typeanno[i]) if types is not None
             annos.append(str(c)+'\t'+str(a))
 
         with gzip.open(table, 'wb') as t:
