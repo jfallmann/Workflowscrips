@@ -103,30 +103,32 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
 
 }
 
+### MAIN ###
+#read in count table and normalize
+dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + exon + condition:exon, flattenedfile = NULL)
+
 
 for (n in 1:ncol(condcomb)){
 
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
-    
-    dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + exon + condition:exon, flattenedfile = NULL)
-    
-    dxd = estimateSizeFactors( dxd )
-    dxd = estimateDispersions( dxd )
-    
+
+    dxdpair = dxd[,which(design(dxd)$condition == condcomb[1]| design(dxd)$condition == condcomb[2]), drop=True]
+
+    dxdpair = estimateSizeFactors( dxdpair )
+    dxdpair = estimateDispersions( dxdpair )
+
     pdf(paste(cname,"DEXSeq","DispEsts.pdf",sep="_"))
-    plotDispEsts( dxd )
+    plotDispEsts( dxdpair )
     dev.off()
-    
-    dxd = testForDEU( dxd )
-    
-    dxd = estimateExonFoldChanges( dxd, fitExpToVar="condition")
-    
-    dxr1 = DEXSeqResults( dxd )
-    
+
+    dxdpair = testForDEU( dxdpair )
+
+    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition")
+
+    dxr1 = DEXSeqResults( dxdpair )
+
     DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80") )
-    
+
 }
-    
-    

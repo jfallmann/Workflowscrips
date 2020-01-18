@@ -56,7 +56,6 @@ for f in HTSeq.GFF_Reader( gtf_file ):
     f.attr['gene_id'] = f.attr['gene_id'].replace( ":", "_" )
     exons[f.iv] += ( f.attr['gene_id'], f.attr['transcript_id'] )
 
-
 # Step 2: Form sets of overlapping genes
 
 # We produce the dict 'gene_sets', whose values are sets of gene IDs. Each set
@@ -112,7 +111,6 @@ for iv, s in exons.steps( ):
     # Make the feature and store it in 'aggregates'
     f = HTSeq.GenomicFeature( aggregate_id, "exon", iv )
     f.source = os.path.basename( sys.argv[0] )
-    #   f.source = "camara"
     f.attr = {}
     f.attr[ 'gene_id' ] = aggregate_id
     transcript_set = set( ( transcript_id for gene_id, transcript_id in s ) )
@@ -152,12 +150,12 @@ if '.gz' in out_file:
     with gzip.open( out_file, "wb" ) as fout:
         for aggr_feat in aggregate_features:
             fout.write( bytes(aggr_feat.get_gff_line(), encoding='UTF8'))
-        for f in aggregates[ aggr_feat.name ]:
-            fout.write( bytes(f.get_gff_line(), encoding='UTF8'))
+            for f in aggregates[ aggr_feat.name ]:
+                fout.write( bytes(f.get_gff_line(), encoding='UTF8'))
 
 else:
     with open( out_file, "w" ) as fout:
         for aggr_feat in aggregate_features:
             fout.write( aggr_feat.get_gff_line() )
-        for f in aggregates[ aggr_feat.name ]:
-            fout.write( f.get_gff_line() )
+            for f in aggregates[ aggr_feat.name ]:
+                fout.write( f.get_gff_line() )
