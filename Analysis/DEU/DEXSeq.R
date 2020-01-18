@@ -13,9 +13,9 @@ anname<-args[1]
 countfile<-args[2]
 outdir<-args[3]
 
-anname<-'RUN_DE_Analysis.anno.gz'
-countfile<-''
-outdir<-'/home/fall/Offlinework/Alzheimer/DEXManual/Tables'
+#anname<-'RUN_DE_Analysis.anno.gz'
+#countfile<-''
+#outdir<-'/home/fall/Offlinework/Alzheimer/DEXManual/Tables'
 
 
 ## Annotation
