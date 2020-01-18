@@ -178,6 +178,6 @@ fcountgtf = opts.fcgtf
 
 if fcountgtf :
     if '.gz' in fcountgtf:
-	    os.system('zcat '+out_file+'|sed s/aggregate_gene/gene/g|sed s/exonic_part/exon/g |gzip > ' + fcountgtf)
+	    os.system('zcat '+out_file+'|sed s/aggregate_gene/gene/g|sed s/exonic_part/exon/g |cut -d$\';\' -f1|gzip > ' + fcountgtf)
     else:
-	    os.system('sed s/aggregate_gene/gene/g ' + out_file + '|sed s/exonic_part/exon/g > ' + fcountgtf)
+	    os.system('sed s/aggregate_gene/gene/g ' + out_file + '|sed s/exonic_part/exon/g |cut -d$\';\' -f1 > ' + fcountgtf)
