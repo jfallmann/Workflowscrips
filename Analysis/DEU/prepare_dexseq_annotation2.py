@@ -75,8 +75,8 @@ if aggregateGenes == True:
         for gene_id, transcript_id in s:
             full_set.add( gene_id )
             full_set |= gene_sets[ gene_id ]
-          # Make sure that all genes that are now in full_set get associated
-          # with full_set, i.e., get to know about their new partners
+        # Make sure that all genes that are now in full_set get associated
+        # with full_set, i.e., get to know about their new partners
         for gene_id in full_set:
             assert gene_sets[ gene_id ] <= full_set
             gene_sets[ gene_id ] = full_set
@@ -100,16 +100,16 @@ for iv, s in exons.steps( ):
         check_set = set()
         for geneID, transcript_id in s:
             check_set.add( geneID )
-            if( len( check_set ) > 1 ):
-                continue
-            else:
-                aggregate_id = gene_id
+        if( len( check_set ) > 1 ):
+            continue
+        else:
+            aggregate_id = gene_id
     # Take one of the gene IDs, find the others via gene sets, and
     # form the aggregate ID from all of them
     else:
         assert set( gene_id for gene_id, transcript_id in s ) <= gene_sets[ gene_id ]
         aggregate_id = '+'.join( gene_sets[ gene_id ] )
-        # Make the feature and store it in 'aggregates'
+    # Make the feature and store it in 'aggregates'
     f = HTSeq.GenomicFeature( aggregate_id, "exon", iv )
     f.source = os.path.basename( sys.argv[0] )
     #   f.source = "camara"
@@ -135,15 +135,14 @@ for l in aggregates.values():
             raise ValueError(
                 "Same name found on two strands: %s, %s" % ( str(l[i]), str(l[i+1]) )
             )
-        aggr_feat = HTSeq.GenomicFeature( l[0].name, "gene",
-                                          HTSeq.GenomicInterval( l[0].iv.chrom, l[0].iv.start,
-                                                                 l[-1].iv.end, l[0].iv.strand ) )
-        aggr_feat.source = os.path.basename( sys.argv[0] )
-        aggr_feat.attr = { 'gene_id': aggr_feat.name }
+    aggr_feat = HTSeq.GenomicFeature( l[0].name, "gene",
+                                      HTSeq.GenomicInterval( l[0].iv.chrom, l[0].iv.start,
+                                                             l[-1].iv.end, l[0].iv.strand ) )
+    aggr_feat.source = os.path.basename( sys.argv[0] )
+    aggr_feat.attr = { 'gene_id': aggr_feat.name }
     for i in range( len(l) ):
         l[i].attr['exon_number'] = "%03d" % ( i+1 )
-        aggregate_features.append( aggr_feat )
-
+    aggregate_features.append( aggr_feat )
 
 # Step 5: Sort the aggregates, then write everything out
 
