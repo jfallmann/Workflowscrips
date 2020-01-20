@@ -115,7 +115,6 @@ setwd(outdir)
 
 for (n in 1:ncol(condcomb)){
 
-    n = 1
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
