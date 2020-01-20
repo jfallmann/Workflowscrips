@@ -11,18 +11,21 @@ args <- commandArgs(trailingOnly = TRUE)
 
 anname<-args[1]
 countfile<-args[2]
-outdir<-args[3]
+flatanno<-args[3]
+outdir<-args[4]
+availablecores <- args[5]
 
-#anname<-'RUN_DE_Analysis.anno.gz'
-#countfile<-''
-#outdir<-'/home/fall/Offlinework/Alzheimer/DEXManual/Tables'
-
+#anname<-'~/Work/Alzheimer/DEU/DEXManual/Tables/RUN_DEU_Analysis.anno.gz'
+#flatanno<-'~/Work/Alzheimer/DEU/DEXManual/Tables/Homo_Anno_dexseq.gtf.gz'
+#countfile<-'~/Work/Alzheimer/DEU/DEXManual/Tables/RUN_DEU_Analysis.tbl.gz'
+#outdir<-'~/Work/Alzheimer/DEU/DEXManual/DEXSeq'
+#availablecores <- 2
 
 ## Annotation
 sampleData <- as.matrix(read.table(gzfile(anname),row.names=1))
 colnames(sampleData) <- c("condition","type")
 sampleData <- as.data.frame(sampleData)
-head(sampleData)
+#head(sampleData)
 ## Combinations of conditions
 condcomb<-as.data.frame(combn(unique(sampleData$condition),2))[1:2,]
 ##countfile <- as.matrix(read.table(gzfile(inname),header=T,row.names=1))
@@ -37,7 +40,8 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
 {
     ##  Take a fcount file and convert it to dcounts for dexseq
     message("Reading and adding Exon IDs for DEXSeq")
-    read.table(countfile,skip = 2) %>% dplyr::arrange(V1,V3,V4) %>% dplyr::select(-(V2:V6)) -> dcounts
+    #read.table(countfile,skip = 2) %>% dplyr::arrange(V1,V3,V4) %>% dplyr::select(-(V2:V6)) -> dcounts
+    read.table(countfile,skip = 2) %>% dplyr::arrange(V1,V3,V4) -> dcounts
     colnames(dcounts) <- c("GeneID", rownames(sampleData) )
     id <- as.character(dcounts[,1])
     n <- id
@@ -55,6 +59,7 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
     exons <- sapply(splitted, "[[", 2)
     genesrle <- sapply(splitted, "[[", 1)
 
+    #flattenedfile<-flatanno
     ## parse the flattened file
     if (!is.null(flattenedfile)) {
         aggregates <- read.delim(flattenedfile, stringsAsFactors = FALSE,
@@ -62,12 +67,12 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
         colnames(aggregates) <- c("chr", "source", "class", "start",
                                   "end", "ex", "strand", "ex2", "attr")
         aggregates$strand <- gsub("\\.", "*", aggregates$strand)
-        aggregates <- aggregates[which(aggregates$class == "exon"), # exonic_part
+        aggregates <- aggregates[which(aggregates$class == "exonic_part"), # exonic_part
                                  ]
         aggregates$attr <- gsub("\"|=|;", "", aggregates$attr)
         aggregates$gene_id <- sub(".*gene_id\\s(\\S+).*", "\\1",
                                   aggregates$attr)
-                                        # trim the gene_ids to 255 chars in order to match with featurecounts
+        # trim the gene_ids to 255 chars in order to match with featurecounts
         longIDs <- sum(nchar(unique(aggregates$gene_id)) > 255)
         warning(paste0(longIDs,
                        " aggregate geneIDs were found truncated in featureCounts output"),
@@ -77,7 +82,7 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
         transcripts <- gsub(".*transcripts\\s(\\S+).*", "\\1",
                             aggregates$attr)
         transcripts <- strsplit(transcripts, "\\+")
-        exonids <- gsub(".*exon_number\\s(\\S+).*", "\\1", # exonic_part_number
+        exonids <- gsub(".*exonic_part_number\\s(\\S+).*", "\\1", # exonic_part_number
                         aggregates$attr)
         exoninfo <- GRanges(as.character(aggregates$chr), IRanges(start = aggregates$start,
                                                                   end = aggregates$end), strand = aggregates$strand)
@@ -105,30 +110,35 @@ DEXSeqDataSetFromFeatureCounts <- function (countfile, sampleData,
 
 ### MAIN ###
 #read in count table and normalize
-dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + exon + condition:exon, flattenedfile = NULL)
+
+dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + exon + condition:exon, flattenedfile = flatanno)
 
 
 for (n in 1:ncol(condcomb)){
 
+    n = 1
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
 
-    dxdpair = dxd[,which(design(dxd)$condition == condcomb[1]| design(dxd)$condition == condcomb[2]), drop=True]
-
+    dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2])]#, drop=True]
+    #dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2]), drop]
+    
     dxdpair = estimateSizeFactors( dxdpair )
-    dxdpair = estimateDispersions( dxdpair )
+    dxdpair = estimateDispersions( dxdpair, BPPARAM=MulticoreParam(workers=availablecores))
 
-    pdf(paste(cname,"DEXSeq","DispEsts.pdf",sep="_"))
+    pdf(paste("DEXSeq",cname,"DispEsts.pdf",sep="_"))
     plotDispEsts( dxdpair )
     dev.off()
 
-    dxdpair = testForDEU( dxdpair )
+    dxdpair = testForDEU( dxdpair,BPPARAM=MulticoreParam(workers=availablecores) )
 
-    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition")
+    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition", BPPARAM=MulticoreParam(workers=availablecores))
 
     dxr1 = DEXSeqResults( dxdpair )
-
-    DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80") )
+    
+    htmlout <- paste(paste('DEXSeq',condcomb[1],condcomb[2],sep='_'),'.html', sep='')
+    pathout <- paste('DEXSeqReport',condcomb[1],condcomb[2],sep='_')
+    DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)
 
 }

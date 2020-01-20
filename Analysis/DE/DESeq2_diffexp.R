@@ -1,12 +1,16 @@
 #https://dwheelerau.com/2014/02/17/how-to-use-deseq2-to-analyse-rnaseq-data/
 library(DESeq2)
 require(utils)
+library("BiocParallel")
 
 args <- commandArgs(trailingOnly = TRUE)
 
 anname<-args[1]
 inname<-args[2]
 outdir<-args[3]
+availablecores <- args[5]
+
+register(MulticoreParam(availablecores))
 
 anno <- as.matrix(read.table(gzfile(anname),row.names=1))
 colnames(anno) <- c("condition")
@@ -31,7 +35,7 @@ keep <- rowSums(counts(dds)) >= 10
 dds <- dds[keep,]
 
 #run for each pair of conditions
-dds <- DESeq(dds)
+dds <- DESeq(dds, parallel=True, BPPARAM=MulticoreParam(workers=availablecores))
 
 dds$condition
 resultsNames(dds)
@@ -42,7 +46,7 @@ for (n in 1:ncol(condcomb)){
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
 
-    res <- results(dds,contrast=c("condition",as.character(condcomb[1,n]),as.character(condcomb[2,n])))#, name=paste(condcomb[,n],collapse='_vs_'))
+    res <- results(dds,contrast=c("condition",as.character(condcomb[1,n]),as.character(condcomb[2,n])), parallel=True, BPPARAM=MulticoreParam(workers=availablecores))#, name=paste(condcomb[,n],collapse='_vs_'))
                                             #sort and output
     resOrdered <- res[order(res$log2FoldChange),]
                                         #write the table to a csv file
