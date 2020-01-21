@@ -119,9 +119,9 @@ for (n in 1:ncol(condcomb)){
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
 
-    BPPARAM = MultiCoreParam(availablecores)
+    BPPARAM = MulticoreParam(availablecores)
 
-    dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2])]#, drop=True]
+    dxdpair = dxd[,which(dxd$condition == condcomb[1,n] | dxd$condition == condcomb[2,n])]#, drop=True]
 
     dxdpair = estimateSizeFactors( dxdpair )
     dxdpair = estimateDispersions( dxdpair, BPPARAM=BPPARAM)
