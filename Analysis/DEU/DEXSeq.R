@@ -113,6 +113,8 @@ dxd = DEXSeqDataSetFromFeatureCounts(countfile, sampleData, design = ~sample + e
 
 setwd(outdir)
 
+print(paste('Will run DEXSeq with ',availablecores,' cores',sep=''))
+
 for (n in 1:ncol(condcomb)){
 
     cname=""
