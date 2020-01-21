@@ -120,7 +120,6 @@ for (n in 1:ncol(condcomb)){
     print(cname)
 
     dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2])]#, drop=True]
-    #dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2]), drop]
 
     dxdpair = estimateSizeFactors( dxdpair )
     dxdpair = estimateDispersions( dxdpair, BPPARAM=MulticoreParam(workers=availablecores))
@@ -135,8 +134,10 @@ for (n in 1:ncol(condcomb)){
 
     dxr1 = DEXSeqResults( dxdpair )
 
-    htmlout <- paste(paste('DEXSeq',condcomb[1],condcomb[2],sep='_'),'.html', sep='')
-    pathout <- paste('DEXSeqReport',condcomb[1],condcomb[2],sep='_')
+    htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
+    pathout <- paste('DEXSeqReport',cname,sep='_')
     DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)
+
+    rm(dxdpair,dxr1)
 
 }
