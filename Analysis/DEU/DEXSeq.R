@@ -119,18 +119,20 @@ for (n in 1:ncol(condcomb)){
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
 
+    BPPARAM = MultiCoreParam(availablecores)
+
     dxdpair = dxd[,which(dxd$condition == condcomb[1] | dxd$condition == condcomb[2])]#, drop=True]
 
     dxdpair = estimateSizeFactors( dxdpair )
-    dxdpair = estimateDispersions( dxdpair, BPPARAM=MulticoreParam(workers=availablecores))
+    dxdpair = estimateDispersions( dxdpair, BPPARAM=BPPARAM)
 
     pdf(paste("DEXSeq",cname,"DispEsts.pdf",sep="_"))
     plotDispEsts( dxdpair )
     dev.off()
 
-    dxdpair = testForDEU( dxdpair,BPPARAM=MulticoreParam(workers=availablecores) )
+    dxdpair = testForDEU( dxdpair,BPPARAM=BPPARAM )
 
-    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition", BPPARAM=MulticoreParam(workers=availablecores))
+    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition", BPPARAM=BPPARAM)
 
     dxr1 = DEXSeqResults( dxdpair )
 
