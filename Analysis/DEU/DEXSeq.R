@@ -142,4 +142,6 @@ for (n in 1:ncol(condcomb)){
 
     rm(dxdpair,dxr1)
 
+    print(paste('cleanup done for ', cname, sep=''))
+
 }
