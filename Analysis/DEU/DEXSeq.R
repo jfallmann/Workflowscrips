@@ -18,6 +18,7 @@ availablecores <- args[5]
 #anname<-'~/Work/Alzheimer/DEU/DEXManual/Tables/RUN_DEU_Analysis.anno.gz'
 #flatanno<-'~/Work/Alzheimer/DEU/DEXManual/Tables/Homo_Anno_dexseq.gtf.gz'
 #countfile<-'~/Work/Alzheimer/DEU/DEXManual/Tables/RUN_DEU_Analysis.tbl.gz'
+#countfile<-'~/Work/Alzheimer/DEU/DEXManual/Tables/Test.tbl.gz'
 #outdir<-'~/Work/Alzheimer/DEU/DEXManual/DEXSeq'
 #availablecores <- 2
 
@@ -120,6 +121,7 @@ for (n in 1:ncol(condcomb)){
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
+    
     tryCatch({
         BPPARAM = MulticoreParam(availablecores)
 
