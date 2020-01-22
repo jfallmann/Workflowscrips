@@ -138,6 +138,9 @@ for (n in 1:ncol(condcomb)){
 
         dxr1 = DEXSeqResults( dxdpair )
 
+        csvout <- paste(paste('DEXSeqResults',cname,sep='_'),'.tsv.gz', sep='')
+        write.csv.gz(as.data.frame(dxr1), csvout, quote=FALSE, sep="\t", dec=".")
+
         htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
         pathout <- paste('DEXSeqReport',cname,sep='_')
         DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)
