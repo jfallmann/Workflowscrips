@@ -147,5 +147,5 @@ for (n in 1:ncol(condcomb)){
         print(paste('cleanup done for ', cname, sep=''))
 
 
-    }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+    }, error=function(e){cat("WARNING :",conditionMessage(e), "\n")})
 }

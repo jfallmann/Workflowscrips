@@ -65,7 +65,7 @@ for (n in 1:ncol(condcomb)){
                                         #We also write the normalized counts to file
         write.table(as.data.frame(assay(rld)), gzfile(paste(cname,"DESeq2_rld.txt.gz",sep="_")), sep="\t", col.names=NA)
         write.table(as.data.frame(assay(vsd)), gzfile(paste(cname,"DESeq2_vsd.txt.gz",sep="_")), sep="\t", col.names=NA)
-    }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
+    }, error=function(e){cat("WARNING :",conditionMessage(e), "\n")})
 
 }
 
