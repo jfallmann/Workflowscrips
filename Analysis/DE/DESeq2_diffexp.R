@@ -46,24 +46,26 @@ for (n in 1:ncol(condcomb)){
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
 
-    res <- results(dds,contrast=c("condition",as.character(condcomb[1,n]),as.character(condcomb[2,n])), parallel=True, BPPARAM=MulticoreParam(workers=availablecores))#, name=paste(condcomb[,n],collapse='_vs_'))
-                                            #sort and output
-    resOrdered <- res[order(res$log2FoldChange),]
+    tryCatch({
+        res <- results(dds,contrast=c("condition",as.character(condcomb[1,n]),as.character(condcomb[2,n])), parallel=True, BPPARAM=MulticoreParam(workers=availablecores))#, name=paste(condcomb[,n],collapse='_vs_'))
+                                        #sort and output
+        resOrdered <- res[order(res$log2FoldChange),]
                                         #write the table to a csv file
 
-    pdf(paste(cname,"DESeq2","plot.pdf",sep="_"))
-    plotMA(res, ylim=c(-3,3))
-    dev.off()
-    write.table(as.data.frame(resOrdered), gzfile(paste(cname,'.csv.gz',sep="")), sep="\t")
+        pdf(paste(cname,"DESeq2","plot.pdf",sep="_"))
+        plotMA(res, ylim=c(-3,3))
+        dev.off()
+        write.table(as.data.frame(resOrdered), gzfile(paste(cname,'.csv.gz',sep="")), sep="\t")
 
 ###
                                         #Now we want to transform the raw discretely distributed counts so that we can do clustering. (Note: when you expect a large treatment effect you should actually set blind=FALSE (see https://bioconductor.org/packages/release/bioc/vignettes/DESeq2/inst/doc/DESeq2.html).
-    rld<- rlogTransformation(dds, blind=TRUE)
-    vsd<-varianceStabilizingTransformation(dds, blind=TRUE)
+        rld<- rlogTransformation(dds, blind=TRUE)
+        vsd<-varianceStabilizingTransformation(dds, blind=TRUE)
 
                                         #We also write the normalized counts to file
-    write.table(as.data.frame(assay(rld)), gzfile(paste(cname,"DESeq2_rld.txt.gz",sep="_")), sep="\t", col.names=NA)
-    write.table(as.data.frame(assay(vsd)), gzfile(paste(cname,"DESeq2_vsd.txt.gz",sep="_")), sep="\t", col.names=NA)
+        write.table(as.data.frame(assay(rld)), gzfile(paste(cname,"DESeq2_rld.txt.gz",sep="_")), sep="\t", col.names=NA)
+        write.table(as.data.frame(assay(vsd)), gzfile(paste(cname,"DESeq2_vsd.txt.gz",sep="_")), sep="\t", col.names=NA)
+    }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 
 }
 

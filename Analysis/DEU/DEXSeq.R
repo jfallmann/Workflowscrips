@@ -120,30 +120,32 @@ for (n in 1:ncol(condcomb)){
     cname=""
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
+    tryCatch({
+        BPPARAM = MulticoreParam(availablecores)
 
-    BPPARAM = MulticoreParam(availablecores)
+        dxdpair = dxd[,which(dxd$condition == condcomb[1,n] | dxd$condition == condcomb[2,n])]#, drop=True]
 
-    dxdpair = dxd[,which(dxd$condition == condcomb[1,n] | dxd$condition == condcomb[2,n])]#, drop=True]
+        dxdpair = estimateSizeFactors( dxdpair )
+        dxdpair = estimateDispersions( dxdpair, BPPARAM=BPPARAM)
 
-    dxdpair = estimateSizeFactors( dxdpair )
-    dxdpair = estimateDispersions( dxdpair, BPPARAM=BPPARAM)
+        pdf(paste("DEXSeq",cname,"DispEsts.pdf",sep="_"))
+        plotDispEsts( dxdpair )
+        dev.off()
 
-    pdf(paste("DEXSeq",cname,"DispEsts.pdf",sep="_"))
-    plotDispEsts( dxdpair )
-    dev.off()
+        dxdpair = testForDEU( dxdpair,BPPARAM=BPPARAM )
 
-    dxdpair = testForDEU( dxdpair,BPPARAM=BPPARAM )
+        dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition", BPPARAM=BPPARAM)
 
-    dxdpair = estimateExonFoldChanges( dxdpair, fitExpToVar="condition", BPPARAM=BPPARAM)
+        dxr1 = DEXSeqResults( dxdpair )
 
-    dxr1 = DEXSeqResults( dxdpair )
+        htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
+        pathout <- paste('DEXSeqReport',cname,sep='_')
+        DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)
 
-    htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
-    pathout <- paste('DEXSeqReport',cname,sep='_')
-    DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)
+        rm(dxdpair,dxr1)
 
-    rm(dxdpair,dxr1)
+        print(paste('cleanup done for ', cname, sep=''))
 
-    print(paste('cleanup done for ', cname, sep=''))
 
+    }, error=function(e){cat("ERROR :",conditionMessage(e), "\n")})
 }
