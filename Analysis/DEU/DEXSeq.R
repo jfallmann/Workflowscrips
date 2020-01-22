@@ -139,7 +139,7 @@ for (n in 1:ncol(condcomb)){
         dxr1 = DEXSeqResults( dxdpair )
 
         csvout <- paste(paste('DEXSeqResults',cname,sep='_'),'.tsv.gz', sep='')
-        write.csv.gz(as.data.frame(dxr1), csvout, quote=FALSE, sep="\t", dec=".")
+        write.table(as.data.frame(dxr1), gzfile(csvout), sep="\t")
 
         htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
         pathout <- paste('DEXSeqReport',cname,sep='_')
