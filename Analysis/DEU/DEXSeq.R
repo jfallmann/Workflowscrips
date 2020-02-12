@@ -122,7 +122,7 @@ for (n in 1:ncol(condcomb)){
     cname=paste(condcomb[,n],collapse='_vs_')
     print(cname)
     
-    tryCatch({
+#    tryCatch({
         BPPARAM = MulticoreParam(availablecores)
 
         dxdpair = dxd[,which(dxd$condition == condcomb[1,n] | dxd$condition == condcomb[2,n])]#, drop=True]
@@ -142,7 +142,7 @@ for (n in 1:ncol(condcomb)){
 
         csvout <- paste(paste('DEXSeqResults',cname,sep='_'),'.tsv.gz', sep='')
         write.table(as.data.frame(dxr1), gzfile(csvout), sep="\t")
-
+    tryCatch({
         htmlout <- paste(paste('DEXSeq',cname,sep='_'),'.html', sep='')
         pathout <- paste('DEXSeqReport',cname,sep='_')
         DEXSeqHTML( dxr1, FDR=0.1, color=c("#FF000080", "#0000FF80"), path=pathout, file=htmlout)

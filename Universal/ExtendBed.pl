@@ -129,6 +129,7 @@ my @featurelist; ## This will become a FeatureChain
 while(<$Bed>){
     chomp $_;
     my ($chrom, $start, $end, $id, $score, $strand, @rest) = split (/\t/, $_);
+    $chrom =~ s/^chr//g;
     my $right  = 0;
     my $left   = 0;
     my $width  = nearest(1,($end-$start)/2);
