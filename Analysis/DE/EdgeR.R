@@ -1,9 +1,4 @@
-require(ggplot2)
-require(ggpubr)
-require(magrittr)
 require(edgeR)
-require(devtools)
-require(jsonlite)
 require(statmod)
 
 options(echo=TRUE)
@@ -12,7 +7,7 @@ print(args)
 
 tbl <- args[1]
 smp <- args[2]
-dir <- args[3]
+drct <- args[3]
 
 f <- function(list){
   spektrum <- rainbow(max(list),alpha=1)
@@ -22,6 +17,8 @@ f <- function(list){
   }
   return(cl)
 }
+
+dir.create(file.path(drct,'PICS'), showWarnings = FALSE)
 
 ###READ IN
 data <- read.table(tbl,skip=1,h=F,sep="\t",check.names=FALSE)
@@ -62,7 +59,7 @@ tmm <- as.data.frame(cpm(dge))
 colnames(tmm) <- t(dge$samples$samples)
 tmm$ID <- dge$genes$genes
 tmm <- tmm[c(ncol(tmm),1:ncol(tmm)-1)]
-write.table(tmm, file=paste(dir,"normalized_table.tsv",sep=''), sep="\t", quote=F, row.names=FALSE)
+write.table(tmm, file=paste(drct,"normalized_table.tsv",sep=''), sep="\t", quote=F, row.names=FALSE)
 
 ###plot MDS
 out <- paste(tbl,"_MDS",".png",sep="")
@@ -82,7 +79,7 @@ dge <- estimateDisp(dge, design, robust=TRUE)
 
 ###plot Dispersion
 
-out <- paste(dir,"BCV",".png",sep="")
+out <- paste(drct,"BCV",".png",sep="")
 png(out, width = 350, height = 350)
 plotBCV(dge)
 dev.off()
@@ -116,14 +113,10 @@ for(i in 1:(dim(design)[2]-1)){
 
     print(paste("compare ", title))
 
-    out <- paste(dir,"/PICS/",cs,".png",sep="")
+    out <- paste(drct,"PICS/",cs,".png",sep="")
     png(out, width = 350, height = 350)
     plotMD(lrt, main=title)
     abline(h=c(-1, 1), col="blue")
     dev.off()
   }
 }
-
-###Save session info
-session_info() %>%
-  write_json(paste(dir,"session_info.json",sep=''), force = TRUE)
